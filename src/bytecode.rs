@@ -71,6 +71,7 @@ enum Op {
     PushConstant(u32),  // support more than u16, will expand to multiple ops
     Call(u16),
     StackRef(u16),
+    List(u8),
     Discard,
     ASet,
     Add1,
@@ -84,6 +85,7 @@ impl Op {
             &Self::PushConstant(_) => 1,
             &Self::Call(n) => -(n as i32 + 1) + 1,
             &Self::StackRef(_) => 1,
+            &Self::List(n) => -(n as i32) + 1,
             &Self::Discard => -1,
             &Self::ASet => -3 + 1,
             &Self::Add1 => 0,
@@ -125,6 +127,9 @@ impl Op {
             &Self::StackRef(v) if (1..=4).contains(&v) =>
                 Ok(smallvec![v as u8]),
             &Self::StackRef(_) => unimplemented!(),
+            &Self::List(v) if v == 0 => unreachable!(),
+            &Self::List(v) if (1..=4).contains(&v) => Ok(smallvec![66 + v]),
+            &Self::List(v) => Ok(smallvec![175, v]),
             &Self::Discard => Ok(smallvec![136]),
             &Self::ASet => Ok(smallvec![73]),
             &Self::Add1 => Ok(smallvec![84]),
@@ -187,10 +192,9 @@ impl BytecodeCompiler {
     }
 
     fn compile_value_map(&mut self, map: &json::Map<String, json::Value>) {
-        // list
         let list_len = map.len() * 2;
-        let use_list_call = list_len < (1 << 16);
-        if use_list_call {
+        // see below
+        if list_len < (1 << 16) && list_len >= (1 << 8) {
             self.compile_constant_op(LispObject::Symbol("list".into()));
         }
 
@@ -199,7 +203,10 @@ impl BytecodeCompiler {
             self.compile_value(value);
         }
 
-        if use_list_call {
+        // three modes: 1. list op; 2. list call; 3. recursive cons
+        if list_len < (1 << 8) {
+            self.ops.push(Op::List(list_len as u8));
+        } else if list_len < (1 << 16) {
             self.ops.push(Op::Call(list_len as u16));
         } else {
             self.compile_constant_op(LispObject::Nil);
