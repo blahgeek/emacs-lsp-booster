@@ -1,0 +1,3524 @@
+{
+  "isIncomplete": true,
+  "items": [
+    {
+      "detail": "SubRunner<ResultType>",
+      "filterText": "subrunner",
+      "insertText": "subrunner",
+      "insertTextFormat": 1,
+      "kind": 6,
+      "label": " subrunner",
+      "score": 2.948925256729126,
+      "sortText": "3fc344cfsubrunner",
+      "textEdit": {
+        "newText": "subrunner",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "documentation": {
+        "kind": "markdown",
+        "value": "An RAII class which is supposed to be used inside a function. User can call SubmitTask() to submit tasks, and finally call ParticipateUntilEmpty(), which would make the calling thread participating in working on the tasks in the thread pool of the main task runner, until all the tasks submitted \\_by this subrunner\\_ are done.  \nThis SubRunner class is \\*not\\* thread-safe. It is supposed to use within one thread. For this reason, do not let any submitted task capture and use it. Instead, just create another SubRunner inside the submitted task.  \nOK:  \n{ ModuleTaskRunner::SubRunner\\<void> subrunner(&runner);  \nsubrunner.SubmitTask(\"foo\", [\\]() { ModuleTaskRunner::SubRunner\\<void> another_subrunner(&runner);  \nanother_subrunner.SubmitTask(...);  \n...  \nanother_subrunner.ParticipateUntilEmpty();  \n});  \nsubrunner.ParticipateUntilEmpty();  \n}  \nNOT OK:  \n{ ModuleTaskRunner::SubRunner\\<void> subrunner(&runner);  \nsubrunner.SubmitTask(\"foo\", [&subrunner\\]() { // THIS IS PROBLEMATIC!  \n...  \n});  \nsubrunner.ParticipateUntilEmpty();  \n}  \nCaveats:  \n\\* It is required that every task submitted by the same SubRunner to have the same return type,  \nwhich is the template argument T. If the user want to submit tasks with various return types,  \nit is recommended to return by an output parameter instead of the return value.  \nExample code:  \n{ // inside a worker thread ModuleTaskRunner::SubRunner\\<int> subrunner(&runner);  \nfor (int i = 0; i < kNumTasks; ++i) { subrunner.SubmitTask(\"identity\", [i\\]() { return i; });  \n}  \nstd::vector<std::future\\<int>> futures = subrunner.ParticipateUntilEmpty();  \nfor (std::future\\<T>& future : futures) { const int result = future.get();  \n// use result now.  \n...  \n} }"
+      },
+      "filterText": "SubRunner",
+      "insertText": "SubRunner",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " SubRunner<typename T>",
+      "score": 2.2276294231414795,
+      "sortText": "3ff16e85SubRunner",
+      "textEdit": {
+        "newText": "SubRunner",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "[2 overloads]",
+      "documentation": {
+        "kind": "markdown",
+        "value": "Submit an async task to thread pool. The task can only be submitted from module main thread.  \nSee ThreadPool::Schedule for more details about the return type."
+      },
+      "filterText": "SubmitTask",
+      "insertText": "SubmitTask",
+      "insertTextFormat": 1,
+      "kind": 2,
+      "label": " SubmitTask(…)",
+      "score": 1.33012056350708,
+      "sortText": "4055be9cSubmitTask",
+      "textEdit": {
+        "newText": "SubmitTask",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "void",
+      "documentation": {
+        "kind": "markdown",
+        "value": "For backward compatibility, it is now just an alias of the method SubmitTask().  \nTODO(yiming): Deprecate and remove this function."
+      },
+      "filterText": "SubmitTaskFromSubThread",
+      "insertText": "SubmitTaskFromSubThread",
+      "insertTextFormat": 1,
+      "kind": 2,
+      "label": " SubmitTaskFromSubThread(const std::string &task_name, F &&f, Args &&args...)",
+      "score": 1.33012056350708,
+      "sortText": "4055be9cSubmitTaskFromSubThread",
+      "textEdit": {
+        "newText": "SubmitTaskFromSubThread",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"module_interface.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 31
+            },
+            "start": {
+              "character": 0,
+              "line": 31
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"module_interface.h\"`"
+      },
+      "filterText": "SUBSCRIBE_CUSTOM_MESSAGE_BY_SHARE",
+      "insertText": "SUBSCRIBE_CUSTOM_MESSAGE_BY_SHARE",
+      "insertTextFormat": 1,
+      "kind": 1,
+      "label": "•SUBSCRIBE_CUSTOM_MESSAGE_BY_SHARE(topic, field_name, callback)",
+      "score": 1.255924105644226,
+      "sortText": "40735625SUBSCRIBE_CUSTOM_MESSAGE_BY_SHARE",
+      "textEdit": {
+        "newText": "SUBSCRIBE_CUSTOM_MESSAGE_BY_SHARE",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"module_interface.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 31
+            },
+            "start": {
+              "character": 0,
+              "line": 31
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"module_interface.h\"`"
+      },
+      "filterText": "SUBSCRIBE_ENTIRE_PROTO",
+      "insertText": "SUBSCRIBE_ENTIRE_PROTO",
+      "insertTextFormat": 1,
+      "kind": 1,
+      "label": "•SUBSCRIBE_ENTIRE_PROTO(topic, callback)",
+      "score": 1.255924105644226,
+      "sortText": "40735625SUBSCRIBE_ENTIRE_PROTO",
+      "textEdit": {
+        "newText": "SUBSCRIBE_ENTIRE_PROTO",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"module_interface.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 31
+            },
+            "start": {
+              "character": 0,
+              "line": 31
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"module_interface.h\"`"
+      },
+      "filterText": "SUBSCRIBE_PROTO_BY_SHARE",
+      "insertText": "SUBSCRIBE_PROTO_BY_SHARE",
+      "insertTextFormat": 1,
+      "kind": 1,
+      "label": "•SUBSCRIBE_PROTO_BY_SHARE(topic, field_name, callback)",
+      "score": 1.255924105644226,
+      "sortText": "40735625SUBSCRIBE_PROTO_BY_SHARE",
+      "textEdit": {
+        "newText": "SUBSCRIBE_PROTO_BY_SHARE",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <sys/un.h>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 7
+            },
+            "start": {
+              "character": 0,
+              "line": 7
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<sys/un.h>`"
+      },
+      "filterText": "SUN_LEN",
+      "insertText": "SUN_LEN",
+      "insertTextFormat": 1,
+      "kind": 1,
+      "label": "•SUN_LEN(ptr)",
+      "score": 1.254400372505188,
+      "sortText": "407381d5SUN_LEN",
+      "textEdit": {
+        "newText": "SUN_LEN",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<sys/types.h>`"
+      },
+      "filterText": "suseconds_t",
+      "insertText": "suseconds_t",
+      "insertTextFormat": 1,
+      "kind": 8,
+      "label": " suseconds_t",
+      "score": 0.8171945214271545,
+      "sortText": "40aecc57suseconds_t",
+      "textEdit": {
+        "newText": "suseconds_t",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "SurfaceType",
+      "insertText": "baidu::imap::SurfaceType",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " baidu::imap::SurfaceType",
+      "score": 0.627130925655365,
+      "sortText": "40df7459SurfaceType",
+      "textEdit": {
+        "newText": "baidu::imap::SurfaceType",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "documentation": {
+        "kind": "markdown",
+        "value": "A struct that denotes a contiguous range of characters in a string. A lightweight alternative to string_view."
+      },
+      "filterText": "substring",
+      "insertText": "boost::filesystem::path_detail::substring",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " boost::filesystem::path_detail::substring",
+      "score": 0.627130925655365,
+      "sortText": "40df7459substring",
+      "textEdit": {
+        "newText": "boost::filesystem::path_detail::substring",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/labeling_web/labeling_requirement.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/labeling_web/labeling_requirement.pb.h\"`"
+      },
+      "filterText": "SubObjectConfig",
+      "insertText": "interface::labeling_web::SubObjectConfig",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::labeling_web::SubObjectConfig",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubObjectConfig",
+      "textEdit": {
+        "newText": "interface::labeling_web::SubObjectConfig",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/labeling_web/labeling_requirement.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/labeling_web/labeling_requirement.pb.h\"`"
+      },
+      "filterText": "SubObjectConfigDefaultTypeInternal",
+      "insertText": "interface::labeling_web::SubObjectConfigDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::labeling_web::SubObjectConfigDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubObjectConfigDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::labeling_web::SubObjectConfigDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/router/routing_service.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/router/routing_service.pb.h\"`"
+      },
+      "filterText": "SubRoute",
+      "insertText": "interface::router::SubRoute",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::router::SubRoute",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubRoute",
+      "textEdit": {
+        "newText": "interface::router::SubRoute",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/router/routing_service.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/router/routing_service.pb.h\"`"
+      },
+      "filterText": "SubRouteDefaultTypeInternal",
+      "insertText": "interface::router::SubRouteDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::router::SubRouteDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubRouteDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::router::SubRouteDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/localization/localization_evaluation.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/localization/localization_evaluation.pb.h\"`"
+      },
+      "filterText": "SubScenarioResult",
+      "insertText": "interface::localization::SubScenarioResult",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::localization::SubScenarioResult",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubScenarioResult",
+      "textEdit": {
+        "newText": "interface::localization::SubScenarioResult",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/localization/localization_evaluation.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/localization/localization_evaluation.pb.h\"`"
+      },
+      "filterText": "SubScenarioResultDefaultTypeInternal",
+      "insertText": "interface::localization::SubScenarioResultDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::localization::SubScenarioResultDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubScenarioResultDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::localization::SubScenarioResultDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/remote_assistance/session.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/remote_assistance/session.pb.h\"`"
+      },
+      "filterText": "SubscribeMessage",
+      "insertText": "interface::remote_assistance::SubscribeMessage",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::remote_assistance::SubscribeMessage",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubscribeMessage",
+      "textEdit": {
+        "newText": "interface::remote_assistance::SubscribeMessage",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/remote_assistance/session.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/remote_assistance/session.pb.h\"`"
+      },
+      "filterText": "SubscribeMessageDefaultTypeInternal",
+      "insertText": "interface::remote_assistance::SubscribeMessageDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::remote_assistance::SubscribeMessageDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubscribeMessageDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::remote_assistance::SubscribeMessageDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/framework/module_config.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/framework/module_config.pb.h\"`"
+      },
+      "filterText": "SubscriberConfig",
+      "insertText": "interface::framework::SubscriberConfig",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::framework::SubscriberConfig",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubscriberConfig",
+      "textEdit": {
+        "newText": "interface::framework::SubscriberConfig",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/framework/module_config.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/framework/module_config.pb.h\"`"
+      },
+      "filterText": "SubscriberConfigDefaultTypeInternal",
+      "insertText": "interface::framework::SubscriberConfigDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::framework::SubscriberConfigDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubscriberConfigDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::framework::SubscriberConfigDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/framework/module_config.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/framework/module_config.pb.h\"`"
+      },
+      "filterText": "SubscriberFilter",
+      "insertText": "interface::framework::SubscriberFilter",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::framework::SubscriberFilter",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubscriberFilter",
+      "textEdit": {
+        "newText": "interface::framework::SubscriberFilter",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/framework/module_config.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/framework/module_config.pb.h\"`"
+      },
+      "filterText": "SubscriberFilterDefaultTypeInternal",
+      "insertText": "interface::framework::SubscriberFilterDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::framework::SubscriberFilterDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubscriberFilterDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::framework::SubscriberFilterDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/atomic_data/atomic_data_response.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/atomic_data/atomic_data_response.pb.h\"`"
+      },
+      "filterText": "SuccessResponse",
+      "insertText": "interface::atomic_data::SuccessResponse",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::atomic_data::SuccessResponse",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSuccessResponse",
+      "textEdit": {
+        "newText": "interface::atomic_data::SuccessResponse",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/atomic_data/atomic_data_response.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/atomic_data/atomic_data_response.pb.h\"`"
+      },
+      "filterText": "SuccessResponseDefaultTypeInternal",
+      "insertText": "interface::atomic_data::SuccessResponseDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::atomic_data::SuccessResponseDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSuccessResponseDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::atomic_data::SuccessResponseDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/user_suggestion/user_suggestion_info.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/user_suggestion/user_suggestion_info.pb.h\"`"
+      },
+      "filterText": "Suggestion",
+      "insertText": "interface::user_suggestion::Suggestion",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::user_suggestion::Suggestion",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSuggestion",
+      "textEdit": {
+        "newText": "interface::user_suggestion::Suggestion",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/user_suggestion/user_suggestion_info.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/user_suggestion/user_suggestion_info.pb.h\"`"
+      },
+      "filterText": "SuggestionDefaultTypeInternal",
+      "insertText": "interface::user_suggestion::SuggestionDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::user_suggestion::SuggestionDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSuggestionDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::user_suggestion::SuggestionDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "SuiteApiResolver",
+      "insertText": "testing::internal::SuiteApiResolver",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " testing::internal::SuiteApiResolver<typename T>",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSuiteApiResolver",
+      "textEdit": {
+        "newText": "testing::internal::SuiteApiResolver",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/localization/localization_evaluation.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/localization/localization_evaluation.pb.h\"`"
+      },
+      "filterText": "SummaryMetric",
+      "insertText": "interface::localization::SummaryMetric",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::localization::SummaryMetric",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSummaryMetric",
+      "textEdit": {
+        "newText": "interface::localization::SummaryMetric",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/localization/localization_evaluation.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/localization/localization_evaluation.pb.h\"`"
+      },
+      "filterText": "SummaryMetricDefaultTypeInternal",
+      "insertText": "interface::localization::SummaryMetricDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::localization::SummaryMetricDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSummaryMetricDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::localization::SummaryMetricDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/can/faw_hongqi_ehs9.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/can/faw_hongqi_ehs9.pb.h\"`"
+      },
+      "filterText": "SunShadeSt",
+      "insertText": "interface::can::faw_hongqi_ehs9::SunShadeSt",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::can::faw_hongqi_ehs9::SunShadeSt",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSunShadeSt",
+      "textEdit": {
+        "newText": "interface::can::faw_hongqi_ehs9::SunShadeSt",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/can/faw_hongqi_ehs9.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/can/faw_hongqi_ehs9.pb.h\"`"
+      },
+      "filterText": "SunShadeStDefaultTypeInternal",
+      "insertText": "interface::can::faw_hongqi_ehs9::SunShadeStDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::can::faw_hongqi_ehs9::SunShadeStDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSunShadeStDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::can::faw_hongqi_ehs9::SunShadeStDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/can/saic_marvel_r.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/can/saic_marvel_r.pb.h\"`"
+      },
+      "filterText": "SunroofControlRequest",
+      "insertText": "interface::can::saic_marvel_r::SunroofControlRequest",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::can::saic_marvel_r::SunroofControlRequest",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSunroofControlRequest",
+      "textEdit": {
+        "newText": "interface::can::saic_marvel_r::SunroofControlRequest",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/can/saic_marvel_r.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/can/saic_marvel_r.pb.h\"`"
+      },
+      "filterText": "SunroofControlRequestDefaultTypeInternal",
+      "insertText": "interface::can::saic_marvel_r::SunroofControlRequestDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::can::saic_marvel_r::SunroofControlRequestDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSunroofControlRequestDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::can::saic_marvel_r::SunroofControlRequestDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/can/faw_hongqi_ehs9.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/can/faw_hongqi_ehs9.pb.h\"`"
+      },
+      "filterText": "SunroofSt",
+      "insertText": "interface::can::faw_hongqi_ehs9::SunroofSt",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::can::faw_hongqi_ehs9::SunroofSt",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSunroofSt",
+      "textEdit": {
+        "newText": "interface::can::faw_hongqi_ehs9::SunroofSt",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/can/faw_hongqi_ehs9.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/can/faw_hongqi_ehs9.pb.h\"`"
+      },
+      "filterText": "SunroofStDefaultTypeInternal",
+      "insertText": "interface::can::faw_hongqi_ehs9::SunroofStDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::can::faw_hongqi_ehs9::SunroofStDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSunroofStDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::can::faw_hongqi_ehs9::SunroofStDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/can/gac_aion.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/can/gac_aion.pb.h\"`"
+      },
+      "filterText": "SupplementalRestraintSystem",
+      "insertText": "interface::can::gac_aion::SupplementalRestraintSystem",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::can::gac_aion::SupplementalRestraintSystem",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSupplementalRestraintSystem",
+      "textEdit": {
+        "newText": "interface::can::gac_aion::SupplementalRestraintSystem",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/can/gac_aion.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/can/gac_aion.pb.h\"`"
+      },
+      "filterText": "SupplementalRestraintSystemDefaultTypeInternal",
+      "insertText": "interface::can::gac_aion::SupplementalRestraintSystemDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::can::gac_aion::SupplementalRestraintSystemDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSupplementalRestraintSystemDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::can::gac_aion::SupplementalRestraintSystemDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/map/map_view_for_remote_assistance.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/map/map_view_for_remote_assistance.pb.h\"`"
+      },
+      "filterText": "SupportOperation",
+      "insertText": "interface::map::SupportOperation",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::map::SupportOperation",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSupportOperation",
+      "textEdit": {
+        "newText": "interface::map::SupportOperation",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/map/map_view_for_remote_assistance.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/map/map_view_for_remote_assistance.pb.h\"`"
+      },
+      "filterText": "SupportOperationDefaultTypeInternal",
+      "insertText": "interface::map::SupportOperationDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::map::SupportOperationDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSupportOperationDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::map::SupportOperationDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/can/lincoln_mkz.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/can/lincoln_mkz.pb.h\"`"
+      },
+      "filterText": "Surround",
+      "insertText": "interface::can::Surround",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::can::Surround",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSurround",
+      "textEdit": {
+        "newText": "interface::can::Surround",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/can/lincoln_mkz.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/can/lincoln_mkz.pb.h\"`"
+      },
+      "filterText": "SurroundDefaultTypeInternal",
+      "insertText": "interface::can::SurroundDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::can::SurroundDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSurroundDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::can::SurroundDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/calibration/velodyne_intrinsic.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/calibration/velodyne_intrinsic.pb.h\"`"
+      },
+      "filterText": "SutengM1CorrectedIntrinsic",
+      "insertText": "interface::calibration::SutengM1CorrectedIntrinsic",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::calibration::SutengM1CorrectedIntrinsic",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSutengM1CorrectedIntrinsic",
+      "textEdit": {
+        "newText": "interface::calibration::SutengM1CorrectedIntrinsic",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/calibration/velodyne_intrinsic.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/calibration/velodyne_intrinsic.pb.h\"`"
+      },
+      "filterText": "SutengM1CorrectedIntrinsicDefaultTypeInternal",
+      "insertText": "interface::calibration::SutengM1CorrectedIntrinsicDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::calibration::SutengM1CorrectedIntrinsicDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSutengM1CorrectedIntrinsicDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::calibration::SutengM1CorrectedIntrinsicDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "documentation": {
+        "kind": "markdown",
+        "value": "\\\\internal  \n\\\\brief Template functor for scalar/packet assignment with subtraction"
+      },
+      "filterText": "sub_assign_op",
+      "insertText": "Eigen::internal::sub_assign_op",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " Eigen::internal::sub_assign_op<typename DstScalar, typename SrcScalar>",
+      "score": 0.589321494102478,
+      "sortText": "40e9223asub_assign_op",
+      "textEdit": {
+        "newText": "Eigen::internal::sub_assign_op",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "subvector_stl_iterator",
+      "insertText": "Eigen::internal::subvector_stl_iterator",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " Eigen::internal::subvector_stl_iterator<typename XprType, DirectionType Direction>",
+      "score": 0.589321494102478,
+      "sortText": "40e9223asubvector_stl_iterator",
+      "textEdit": {
+        "newText": "Eigen::internal::subvector_stl_iterator",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "subvector_stl_reverse_iterator",
+      "insertText": "Eigen::internal::subvector_stl_reverse_iterator",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " Eigen::internal::subvector_stl_reverse_iterator<typename XprType, DirectionType Direction>",
+      "score": 0.589321494102478,
+      "sortText": "40e9223asubvector_stl_reverse_iterator",
+      "textEdit": {
+        "newText": "Eigen::internal::subvector_stl_reverse_iterator",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "subtractable",
+      "insertText": "boost::operators_impl::subtractable",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " boost::operators_impl::subtractable<class T, class U, class B, class O>",
+      "score": 0.5710139870643616,
+      "sortText": "40edd207subtractable",
+      "textEdit": {
+        "newText": "boost::operators_impl::subtractable",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <regex>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 14
+            },
+            "start": {
+              "character": 0,
+              "line": 14
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<regex>`  \nC++11 28.9 [re.submatch] Class template sub_match  \nA sequence of characters matched by a particular marked sub-expression.  \nAn object of this class is essentially a pair of iterators marking a matched subexpression within a regular expression pattern match. Such objects can be converted to and compared with std::basic_string objects of a similar base character type as the pattern matched by the regular expression.  \nThe iterators that make up the pair are the usual half-open interval referencing the actual original pattern matched."
+      },
+      "filterText": "sub_match",
+      "insertText": "std::sub_match",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•std::sub_match<typename BiIter>",
+      "score": 0.5643758773803711,
+      "sortText": "40ef8510sub_match",
+      "textEdit": {
+        "newText": "std::sub_match",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <random>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 14
+            },
+            "start": {
+              "character": 0,
+              "line": 14
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<random>`  \n@brief The Marsaglia-Zaman generator.  \nThis is a model of a Generalized Fibonacci discrete random number generator, sometimes referred to as the SWC generator.  \nA discrete random number generator that produces pseudorandom numbers using:  \n@f[ x\\_{i}\\\\leftarrow(x\\_{i - s} - x\\_{i - r} - carry\\_{i-1}) \\\\bmod m  \n@f]  \nThe size of the state is @f$r@f$ and the maximum period of the generator is @f$(m^r - m^s - 1)@f$."
+      },
+      "filterText": "subtract_with_carry_engine",
+      "insertText": "std::subtract_with_carry_engine",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•std::subtract_with_carry_engine<typename UIntType, size_t w, size_t s, size_t r>",
+      "score": 0.5643758773803711,
+      "sortText": "40ef8510subtract_with_carry_engine",
+      "textEdit": {
+        "newText": "std::subtract_with_carry_engine",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "SutengM1GroupPacketReaderModuleTest",
+      "insertText": "drivers::camera::SutengM1GroupPacketReaderModuleTest",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " drivers::camera::SutengM1GroupPacketReaderModuleTest",
+      "score": 0.4831295311450958,
+      "sortText": "4108a33fSutengM1GroupPacketReaderModuleTest",
+      "textEdit": {
+        "newText": "drivers::camera::SutengM1GroupPacketReaderModuleTest",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "SimulationUpdateEvent",
+      "insertText": "interface::simulation::SimulationUpdateEvent",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " interface::simulation::SimulationUpdateEvent",
+      "score": 0.6378918290138245,
+      "sortText": "410b0caeSimulationUpdateEvent",
+      "textEdit": {
+        "newText": "interface::simulation::SimulationUpdateEvent",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "SUCCEED",
+      "insertText": "SUCCEED",
+      "insertTextFormat": 1,
+      "kind": 1,
+      "label": " SUCCEED()",
+      "score": 0.519077479839325,
+      "sortText": "4117740bSUCCEED",
+      "textEdit": {
+        "newText": "SUCCEED",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/perception/scene_understanding.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/perception/scene_understanding.pb.h\"`"
+      },
+      "filterText": "SceneUnderstanding",
+      "insertText": "interface::perceptions::SceneUnderstanding",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::perceptions::SceneUnderstanding",
+      "score": 0.589321494102478,
+      "sortText": "411db357SceneUnderstanding",
+      "textEdit": {
+        "newText": "interface::perceptions::SceneUnderstanding",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "documentation": {
+        "kind": "markdown",
+        "value": "Utility functions to help SuiteApiResolver"
+      },
+      "filterText": "SetUpTearDownSuiteFuncType",
+      "insertText": "testing::internal::SetUpTearDownSuiteFuncType",
+      "insertTextFormat": 1,
+      "kind": 8,
+      "label": " testing::internal::SetUpTearDownSuiteFuncType",
+      "score": 0.589321494102478,
+      "sortText": "411db357SetUpTearDownSuiteFuncType",
+      "textEdit": {
+        "newText": "testing::internal::SetUpTearDownSuiteFuncType",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "Subsampling",
+      "insertText": "image::Subsampling",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " image::Subsampling",
+      "score": 0.4106861352920532,
+      "sortText": "412dba8cSubsampling",
+      "textEdit": {
+        "newText": "image::Subsampling",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "subtractable1",
+      "insertText": "boost::operators_impl::subtractable1",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " boost::operators_impl::subtractable1<class T, class B>",
+      "score": 0.39394426345825195,
+      "sortText": "41364cf0subtractable1",
+      "textEdit": {
+        "newText": "boost::operators_impl::subtractable1",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "subtractable2",
+      "insertText": "boost::operators_impl::subtractable2",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " boost::operators_impl::subtractable2<class T, class U, class B>",
+      "score": 0.39394426345825195,
+      "sortText": "41364cf0subtractable2",
+      "textEdit": {
+        "newText": "boost::operators_impl::subtractable2",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "subtractable2_left",
+      "insertText": "boost::operators_impl::subtractable2_left",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " boost::operators_impl::subtractable2_left<class T, class U, class B>",
+      "score": 0.39394426345825195,
+      "sortText": "41364cf0subtractable2_left",
+      "textEdit": {
+        "newText": "boost::operators_impl::subtractable2_left",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "documentation": {
+        "kind": "markdown",
+        "value": "CUDA Surface reference"
+      },
+      "filterText": "surfaceReference",
+      "insertText": "surfaceReference",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " surfaceReference",
+      "score": 0.3388489782810211,
+      "sortText": "41528263surfaceReference",
+      "textEdit": {
+        "newText": "surfaceReference",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "[3 overloads]",
+      "filterText": "SubRunner",
+      "insertText": "SubRunner",
+      "insertTextFormat": 1,
+      "kind": 4,
+      "label": " SubRunner(…)",
+      "score": 0.28225669264793396,
+      "sortText": "416f7c0dSubRunner",
+      "textEdit": {
+        "newText": "SubRunner",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "S",
+      "filterText": "Sum",
+      "insertText": "math::Sum",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " math::Sum(const C<T> &v)",
+      "score": 0.2802722156047821,
+      "sortText": "41708029Sum",
+      "textEdit": {
+        "newText": "math::Sum",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "Eigen::ComputationInfo",
+      "documentation": {
+        "kind": "markdown",
+        "value": "Computation was successful."
+      },
+      "filterText": "Success",
+      "insertText": "Eigen::Success",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " Eigen::Success",
+      "score": 0.2266768515110016,
+      "sortText": "4197e206Success",
+      "textEdit": {
+        "newText": "Eigen::Success",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceTypeEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "Suteng16",
+      "insertText": "interface::driver::Suteng16",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::Suteng16",
+      "score": 0.2266768515110016,
+      "sortText": "4197e206Suteng16",
+      "textEdit": {
+        "newText": "interface::driver::Suteng16",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceTypeEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SutengBpearl",
+      "insertText": "interface::driver::SutengBpearl",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SutengBpearl",
+      "score": 0.2266768515110016,
+      "sortText": "4197e206SutengBpearl",
+      "textEdit": {
+        "newText": "interface::driver::SutengBpearl",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "const value",
+      "documentation": {
+        "kind": "markdown",
+        "value": "A generic subprotocol error  \nIndicates that a subprotocol error occurred. Typically this involves receiving a message that is not formatted as a valid message for the subprotocol in use."
+      },
+      "filterText": "subprotocol_error",
+      "insertText": "websocketpp::close::status::subprotocol_error",
+      "insertTextFormat": 1,
+      "kind": 6,
+      "label": " websocketpp::close::status::subprotocol_error",
+      "score": 0.2266768515110016,
+      "sortText": "4197e206subprotocol_error",
+      "textEdit": {
+        "newText": "websocketpp::close::status::subprotocol_error",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "websocketpp::processor::error::processor_errors",
+      "documentation": {
+        "kind": "markdown",
+        "value": "Error parsing subprotocols"
+      },
+      "filterText": "subprotocol_parse_error",
+      "insertText": "websocketpp::processor::error::subprotocol_parse_error",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " websocketpp::processor::error::subprotocol_parse_error",
+      "score": 0.2266768515110016,
+      "sortText": "4197e206subprotocol_parse_error",
+      "textEdit": {
+        "newText": "websocketpp::processor::error::subprotocol_parse_error",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "boost::system::errc::errc_t",
+      "filterText": "success",
+      "insertText": "boost::system::errc::success",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " boost::system::errc::success",
+      "score": 0.2266768515110016,
+      "sortText": "4197e206success",
+      "textEdit": {
+        "newText": "boost::system::errc::success",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"external/asio/_virtual_includes/asio/asio/detail/descriptor_ops.hpp\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "bool",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"external/asio/_virtual_includes/asio/asio/detail/descriptor_ops.hpp\"`"
+      },
+      "filterText": "set_user_non_blocking",
+      "insertText": "asio::detail::descriptor_ops::set_user_non_blocking",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": "•asio::detail::descriptor_ops::set_user_non_blocking(int d, state_type &state, bool value, asio::error_code &ec)",
+      "score": 0.28312134742736816,
+      "sortText": "41a69014set_user_non_blocking",
+      "textEdit": {
+        "newText": "asio::detail::descriptor_ops::set_user_non_blocking",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"external/asio/_virtual_includes/asio/asio/detail/socket_ops.hpp\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "bool",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"external/asio/_virtual_includes/asio/asio/detail/socket_ops.hpp\"`"
+      },
+      "filterText": "set_user_non_blocking",
+      "insertText": "asio::detail::socket_ops::set_user_non_blocking",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": "•asio::detail::socket_ops::set_user_non_blocking(socket_type s, state_type &state, bool value, asio::error_code &ec)",
+      "score": 0.28312134742736816,
+      "sortText": "41a69014set_user_non_blocking",
+      "textEdit": {
+        "newText": "asio::detail::socket_ops::set_user_non_blocking",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "void",
+      "filterText": "SanitizerUnpoisonObject",
+      "insertText": "absl::container_internal::SanitizerUnpoisonObject",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " absl::container_internal::SanitizerUnpoisonObject(const T *object)",
+      "score": 0.2805400788784027,
+      "sortText": "41a88b94SanitizerUnpoisonObject",
+      "textEdit": {
+        "newText": "absl::container_internal::SanitizerUnpoisonObject",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "bool",
+      "filterText": "ShouldUseBase",
+      "insertText": "absl::container_internal::internal_compressed_tuple::ShouldUseBase",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " absl::container_internal::internal_compressed_tuple::ShouldUseBase<typename T>()",
+      "score": 0.2805400788784027,
+      "sortText": "41a88b94ShouldUseBase",
+      "textEdit": {
+        "newText": "absl::container_internal::internal_compressed_tuple::ShouldUseBase",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/can/can.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::can::CanBusType",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/can/can.pb.h\"`"
+      },
+      "filterText": "SUBDBW_MRCC",
+      "insertText": "interface::can::SUBDBW_MRCC",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::can::SUBDBW_MRCC",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUBDBW_MRCC",
+      "textEdit": {
+        "newText": "interface::can::SUBDBW_MRCC",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "absl::cord_internal::CordRepKind",
+      "filterText": "SUBSTRING",
+      "insertText": "absl::cord_internal::SUBSTRING",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " absl::cord_internal::SUBSTRING",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUBSTRING",
+      "textEdit": {
+        "newText": "absl::cord_internal::SUBSTRING",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/map/map_roi.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::map::roi::ROISemanticSubtype",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/map/map_roi.pb.h\"`"
+      },
+      "filterText": "SUBTYPE_MAX_ENUM_ID",
+      "insertText": "interface::map::roi::SUBTYPE_MAX_ENUM_ID",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::map::roi::SUBTYPE_MAX_ENUM_ID",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUBTYPE_MAX_ENUM_ID",
+      "textEdit": {
+        "newText": "interface::map::roi::SUBTYPE_MAX_ENUM_ID",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/order_dispatch_platform/gateway_api.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::order_dispatch_platform::OccupyVehicleService",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/order_dispatch_platform/gateway_api.pb.h\"`"
+      },
+      "filterText": "SUISHENXING",
+      "insertText": "interface::order_dispatch_platform::SUISHENXING",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::order_dispatch_platform::SUISHENXING",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUISHENXING",
+      "textEdit": {
+        "newText": "interface::order_dispatch_platform::SUISHENXING",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/alert/alert_id.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::alert::AlertId",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/alert/alert_id.pb.h\"`"
+      },
+      "filterText": "SUPERVISOR_DATA_SEND_FAIL",
+      "insertText": "interface::alert::SUPERVISOR_DATA_SEND_FAIL",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::alert::SUPERVISOR_DATA_SEND_FAIL",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUPERVISOR_DATA_SEND_FAIL",
+      "textEdit": {
+        "newText": "interface::alert::SUPERVISOR_DATA_SEND_FAIL",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/sensor_msg/camera.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::sensor_msg::DeviceRole",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/sensor_msg/camera.pb.h\"`"
+      },
+      "filterText": "SUPPRESSING_FLICKER_ROLE",
+      "insertText": "interface::sensor_msg::SUPPRESSING_FLICKER_ROLE",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::sensor_msg::SUPPRESSING_FLICKER_ROLE",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUPPRESSING_FLICKER_ROLE",
+      "textEdit": {
+        "newText": "interface::sensor_msg::SUPPRESSING_FLICKER_ROLE",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/calibration/lidar_extrinsic_widget.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::calibration::LidarExtrinsicCalibrationStatus",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/calibration/lidar_extrinsic_widget.pb.h\"`"
+      },
+      "filterText": "SUSPENDING",
+      "insertText": "interface::calibration::SUSPENDING",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::calibration::SUSPENDING",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUSPENDING",
+      "textEdit": {
+        "newText": "interface::calibration::SUSPENDING",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/perception/perception_scene_output.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::perception::MissingAlertType",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/perception/perception_scene_output.pb.h\"`"
+      },
+      "filterText": "SUSPICIOUS_CELL",
+      "insertText": "interface::perception::SUSPICIOUS_CELL",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::perception::SUSPICIOUS_CELL",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUSPICIOUS_CELL",
+      "textEdit": {
+        "newText": "interface::perception::SUSPICIOUS_CELL",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_16_LEFT",
+      "insertText": "interface::driver::SUTENG_16_LEFT",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_16_LEFT",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUTENG_16_LEFT",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_16_LEFT",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_16_RIGHT",
+      "insertText": "interface::driver::SUTENG_16_RIGHT",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_16_RIGHT",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUTENG_16_RIGHT",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_16_RIGHT",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_BPEARL_BACK",
+      "insertText": "interface::driver::SUTENG_BPEARL_BACK",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_BPEARL_BACK",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUTENG_BPEARL_BACK",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_BPEARL_BACK",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_BPEARL_FRONT",
+      "insertText": "interface::driver::SUTENG_BPEARL_FRONT",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_BPEARL_FRONT",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUTENG_BPEARL_FRONT",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_BPEARL_FRONT",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_BPEARL_LEFT",
+      "insertText": "interface::driver::SUTENG_BPEARL_LEFT",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_BPEARL_LEFT",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUTENG_BPEARL_LEFT",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_BPEARL_LEFT",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_BPEARL_RIGHT",
+      "insertText": "interface::driver::SUTENG_BPEARL_RIGHT",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_BPEARL_RIGHT",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUTENG_BPEARL_RIGHT",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_BPEARL_RIGHT",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_BPEARL_V2",
+      "insertText": "interface::driver::SUTENG_BPEARL_V2",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_BPEARL_V2",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUTENG_BPEARL_V2",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_BPEARL_V2",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_BPEARL_V3",
+      "insertText": "interface::driver::SUTENG_BPEARL_V3",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_BPEARL_V3",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUTENG_BPEARL_V3",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_BPEARL_V3",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_M1",
+      "insertText": "interface::driver::SUTENG_M1",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_M1",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUTENG_M1",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_M1",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_M1_BACK",
+      "insertText": "interface::driver::SUTENG_M1_BACK",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_M1_BACK",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUTENG_M1_BACK",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_M1_BACK",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_M1_FRONT",
+      "insertText": "interface::driver::SUTENG_M1_FRONT",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_M1_FRONT",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUTENG_M1_FRONT",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_M1_FRONT",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_M1_LEFT",
+      "insertText": "interface::driver::SUTENG_M1_LEFT",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_M1_LEFT",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUTENG_M1_LEFT",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_M1_LEFT",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_M1_RIGHT",
+      "insertText": "interface::driver::SUTENG_M1_RIGHT",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_M1_RIGHT",
+      "score": 0.2266768515110016,
+      "sortText": "41b4e5c5SUTENG_M1_RIGHT",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_M1_RIGHT",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "baidu::imap::SDLinkClass",
+      "documentation": {
+        "kind": "markdown",
+        "value": "城市高速"
+      },
+      "filterText": "SDLC_URBAN_EXPRESSWAY",
+      "insertText": "baidu::imap::SDLC_URBAN_EXPRESSWAY",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " baidu::imap::SDLC_URBAN_EXPRESSWAY",
+      "score": 0.2266768515110016,
+      "sortText": "41d1e984SDLC_URBAN_EXPRESSWAY",
+      "textEdit": {
+        "newText": "baidu::imap::SDLC_URBAN_EXPRESSWAY",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "baidu::imap::SDLinkType",
+      "documentation": {
+        "kind": "markdown",
+        "value": "未定义交通区域"
+      },
+      "filterText": "SDLT_UNDEFINED",
+      "insertText": "baidu::imap::SDLT_UNDEFINED",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " baidu::imap::SDLT_UNDEFINED",
+      "score": 0.2266768515110016,
+      "sortText": "41d1e984SDLT_UNDEFINED",
+      "textEdit": {
+        "newText": "baidu::imap::SDLT_UNDEFINED",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "baidu::imap::SurfaceType",
+      "documentation": {
+        "kind": "markdown",
+        "value": "未知"
+      },
+      "filterText": "SFT_UNKNOWN",
+      "insertText": "baidu::imap::SFT_UNKNOWN",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " baidu::imap::SFT_UNKNOWN",
+      "score": 0.2266768515110016,
+      "sortText": "41d1e984SFT_UNKNOWN",
+      "textEdit": {
+        "newText": "baidu::imap::SFT_UNKNOWN",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/localization/visual_localization.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::localization::FeatureMatchStatus",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/localization/visual_localization.pb.h\"`"
+      },
+      "filterText": "STATUS_UNKNOWN",
+      "insertText": "interface::localization::STATUS_UNKNOWN",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::localization::STATUS_UNKNOWN",
+      "score": 0.2266768515110016,
+      "sortText": "41d1e984STATUS_UNKNOWN",
+      "textEdit": {
+        "newText": "interface::localization::STATUS_UNKNOWN",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "Eigen::UpLoType",
+      "documentation": {
+        "kind": "markdown",
+        "value": "View matrix as an upper triangular matrix with zeros on the diagonal."
+      },
+      "filterText": "StrictlyUpper",
+      "insertText": "Eigen::StrictlyUpper",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " Eigen::StrictlyUpper",
+      "score": 0.2266768515110016,
+      "sortText": "41d1e984StrictlyUpper",
+      "textEdit": {
+        "newText": "Eigen::StrictlyUpper",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "bool",
+      "filterText": "IsSuccess",
+      "insertText": "hdfs::IsSuccess",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " hdfs::IsSuccess(const utils::Response &response)",
+      "score": 0.29023683071136475,
+      "sortText": "4221191eIsSuccess",
+      "textEdit": {
+        "newText": "hdfs::IsSuccess",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "std::vector<std::string>",
+      "filterText": "RegexMatchSubDirs",
+      "insertText": "hdfs::RegexMatchSubDirs",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " hdfs::RegexMatchSubDirs(const std::string &base_dir, const std::string &regex, WebHdfsClient *hdfs_client)",
+      "score": 0.21430014073848724,
+      "sortText": "42a48e81RegexMatchSubDirs",
+      "textEdit": {
+        "newText": "hdfs::RegexMatchSubDirs",
+        "range": {
+          "end": {
+            "character": 6,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    }
+  ]
+}

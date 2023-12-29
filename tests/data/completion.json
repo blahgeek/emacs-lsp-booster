@@ -1,0 +1,3255 @@
+{
+  "isIncomplete": null,
+  "items": [
+    {
+      "detail": "SubRunner<ResultType>",
+      "filterText": "subrunner",
+      "insertText": "subrunner",
+      "insertTextFormat": 1,
+      "kind": 6,
+      "label": " subrunner",
+      "score": 2.948925256729126,
+      "sortText": "3fc344cfsubrunner",
+      "textEdit": {
+        "newText": "subrunner",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "documentation": {
+        "kind": "markdown",
+        "value": "An RAII class which is supposed to be used inside a function. User can call SubmitTask() to submit tasks, and finally call ParticipateUntilEmpty(), which would make the calling thread participating in working on the tasks in the thread pool of the main task runner, until all the tasks submitted \\_by this subrunner\\_ are done.  \nThis SubRunner class is \\*not\\* thread-safe. It is supposed to use within one thread. For this reason, do not let any submitted task capture and use it. Instead, just create another SubRunner inside the submitted task.  \nOK:  \n{ ModuleTaskRunner::SubRunner\\<void> subrunner(&runner);  \nsubrunner.SubmitTask(\"foo\", [\\]() { ModuleTaskRunner::SubRunner\\<void> another_subrunner(&runner);  \nanother_subrunner.SubmitTask(...);  \n...  \nanother_subrunner.ParticipateUntilEmpty();  \n});  \nsubrunner.ParticipateUntilEmpty();  \n}  \nNOT OK:  \n{ ModuleTaskRunner::SubRunner\\<void> subrunner(&runner);  \nsubrunner.SubmitTask(\"foo\", [&subrunner\\]() { // THIS IS PROBLEMATIC!  \n...  \n});  \nsubrunner.ParticipateUntilEmpty();  \n}  \nCaveats:  \n\\* It is required that every task submitted by the same SubRunner to have the same return type,  \nwhich is the template argument T. If the user want to submit tasks with various return types,  \nit is recommended to return by an output parameter instead of the return value.  \nExample code:  \n{ // inside a worker thread ModuleTaskRunner::SubRunner\\<int> subrunner(&runner);  \nfor (int i = 0; i < kNumTasks; ++i) { subrunner.SubmitTask(\"identity\", [i\\]() { return i; });  \n}  \nstd::vector<std::future\\<int>> futures = subrunner.ParticipateUntilEmpty();  \nfor (std::future\\<T>& future : futures) { const int result = future.get();  \n// use result now.  \n...  \n} }"
+      },
+      "filterText": "SubRunner",
+      "insertText": "SubRunner",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " SubRunner<typename T>",
+      "score": 2.2276294231414795,
+      "sortText": "3ff16e85SubRunner",
+      "textEdit": {
+        "newText": "SubRunner",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "[2 overloads]",
+      "documentation": {
+        "kind": "markdown",
+        "value": "Submit an async task to thread pool. The task can only be submitted from module main thread.  \nSee ThreadPool::Schedule for more details about the return type."
+      },
+      "filterText": "SubmitTask",
+      "insertText": "SubmitTask",
+      "insertTextFormat": 1,
+      "kind": 2,
+      "label": " SubmitTask(…)",
+      "score": 1.33012056350708,
+      "sortText": "4055be9cSubmitTask",
+      "textEdit": {
+        "newText": "SubmitTask",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "void",
+      "documentation": {
+        "kind": "markdown",
+        "value": "For backward compatibility, it is now just an alias of the method SubmitTask().  \nTODO(yiming): Deprecate and remove this function."
+      },
+      "filterText": "SubmitTaskFromSubThread",
+      "insertText": "SubmitTaskFromSubThread",
+      "insertTextFormat": 1,
+      "kind": 2,
+      "label": " SubmitTaskFromSubThread(const std::string &task_name, F &&f, Args &&args...)",
+      "score": 1.33012056350708,
+      "sortText": "4055be9cSubmitTaskFromSubThread",
+      "textEdit": {
+        "newText": "SubmitTaskFromSubThread",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"module_interface.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 31
+            },
+            "start": {
+              "character": 0,
+              "line": 31
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"module_interface.h\"`"
+      },
+      "filterText": "SUBSCRIBE_CUSTOM_MESSAGE_BY_SHARE",
+      "insertText": "SUBSCRIBE_CUSTOM_MESSAGE_BY_SHARE",
+      "insertTextFormat": 1,
+      "kind": 1,
+      "label": "•SUBSCRIBE_CUSTOM_MESSAGE_BY_SHARE(topic, field_name, callback)",
+      "score": 1.255924105644226,
+      "sortText": "407a08e6SUBSCRIBE_CUSTOM_MESSAGE_BY_SHARE",
+      "textEdit": {
+        "newText": "SUBSCRIBE_CUSTOM_MESSAGE_BY_SHARE",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"module_interface.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 31
+            },
+            "start": {
+              "character": 0,
+              "line": 31
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"module_interface.h\"`"
+      },
+      "filterText": "SUBSCRIBE_ENTIRE_PROTO",
+      "insertText": "SUBSCRIBE_ENTIRE_PROTO",
+      "insertTextFormat": 1,
+      "kind": 1,
+      "label": "•SUBSCRIBE_ENTIRE_PROTO(topic, callback)",
+      "score": 1.255924105644226,
+      "sortText": "407a08e6SUBSCRIBE_ENTIRE_PROTO",
+      "textEdit": {
+        "newText": "SUBSCRIBE_ENTIRE_PROTO",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"module_interface.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 31
+            },
+            "start": {
+              "character": 0,
+              "line": 31
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"module_interface.h\"`"
+      },
+      "filterText": "SUBSCRIBE_PROTO_BY_SHARE",
+      "insertText": "SUBSCRIBE_PROTO_BY_SHARE",
+      "insertTextFormat": 1,
+      "kind": 1,
+      "label": "•SUBSCRIBE_PROTO_BY_SHARE(topic, field_name, callback)",
+      "score": 1.255924105644226,
+      "sortText": "407a08e6SUBSCRIBE_PROTO_BY_SHARE",
+      "textEdit": {
+        "newText": "SUBSCRIBE_PROTO_BY_SHARE",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "documentation": {
+        "kind": "markdown",
+        "value": "A struct that denotes a contiguous range of characters in a string. A lightweight alternative to string_view."
+      },
+      "filterText": "substring",
+      "insertText": "boost::filesystem::path_detail::substring",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " boost::filesystem::path_detail::substring",
+      "score": 0.627130925655365,
+      "sortText": "40df7459substring",
+      "textEdit": {
+        "newText": "boost::filesystem::path_detail::substring",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/labeling_web/labeling_requirement.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/labeling_web/labeling_requirement.pb.h\"`"
+      },
+      "filterText": "SubObjectConfig",
+      "insertText": "interface::labeling_web::SubObjectConfig",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::labeling_web::SubObjectConfig",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubObjectConfig",
+      "textEdit": {
+        "newText": "interface::labeling_web::SubObjectConfig",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/labeling_web/labeling_requirement.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/labeling_web/labeling_requirement.pb.h\"`"
+      },
+      "filterText": "SubObjectConfigDefaultTypeInternal",
+      "insertText": "interface::labeling_web::SubObjectConfigDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::labeling_web::SubObjectConfigDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubObjectConfigDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::labeling_web::SubObjectConfigDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/router/routing_service.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/router/routing_service.pb.h\"`"
+      },
+      "filterText": "SubRoute",
+      "insertText": "interface::router::SubRoute",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::router::SubRoute",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubRoute",
+      "textEdit": {
+        "newText": "interface::router::SubRoute",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/router/routing_service.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/router/routing_service.pb.h\"`"
+      },
+      "filterText": "SubRouteDefaultTypeInternal",
+      "insertText": "interface::router::SubRouteDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::router::SubRouteDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubRouteDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::router::SubRouteDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/localization/localization_evaluation.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/localization/localization_evaluation.pb.h\"`"
+      },
+      "filterText": "SubScenarioResult",
+      "insertText": "interface::localization::SubScenarioResult",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::localization::SubScenarioResult",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubScenarioResult",
+      "textEdit": {
+        "newText": "interface::localization::SubScenarioResult",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/localization/localization_evaluation.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/localization/localization_evaluation.pb.h\"`"
+      },
+      "filterText": "SubScenarioResultDefaultTypeInternal",
+      "insertText": "interface::localization::SubScenarioResultDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::localization::SubScenarioResultDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubScenarioResultDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::localization::SubScenarioResultDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/remote_assistance/session.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/remote_assistance/session.pb.h\"`"
+      },
+      "filterText": "SubscribeMessage",
+      "insertText": "interface::remote_assistance::SubscribeMessage",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::remote_assistance::SubscribeMessage",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubscribeMessage",
+      "textEdit": {
+        "newText": "interface::remote_assistance::SubscribeMessage",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/remote_assistance/session.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/remote_assistance/session.pb.h\"`"
+      },
+      "filterText": "SubscribeMessageDefaultTypeInternal",
+      "insertText": "interface::remote_assistance::SubscribeMessageDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::remote_assistance::SubscribeMessageDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubscribeMessageDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::remote_assistance::SubscribeMessageDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/framework/module_config.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/framework/module_config.pb.h\"`"
+      },
+      "filterText": "SubscriberConfig",
+      "insertText": "interface::framework::SubscriberConfig",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::framework::SubscriberConfig",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubscriberConfig",
+      "textEdit": {
+        "newText": "interface::framework::SubscriberConfig",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/framework/module_config.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/framework/module_config.pb.h\"`"
+      },
+      "filterText": "SubscriberConfigDefaultTypeInternal",
+      "insertText": "interface::framework::SubscriberConfigDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::framework::SubscriberConfigDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubscriberConfigDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::framework::SubscriberConfigDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/framework/module_config.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/framework/module_config.pb.h\"`"
+      },
+      "filterText": "SubscriberFilter",
+      "insertText": "interface::framework::SubscriberFilter",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::framework::SubscriberFilter",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubscriberFilter",
+      "textEdit": {
+        "newText": "interface::framework::SubscriberFilter",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/framework/module_config.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/framework/module_config.pb.h\"`"
+      },
+      "filterText": "SubscriberFilterDefaultTypeInternal",
+      "insertText": "interface::framework::SubscriberFilterDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::framework::SubscriberFilterDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "40e9223aSubscriberFilterDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::framework::SubscriberFilterDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "documentation": {
+        "kind": "markdown",
+        "value": "\\\\internal  \n\\\\brief Template functor for scalar/packet assignment with subtraction"
+      },
+      "filterText": "sub_assign_op",
+      "insertText": "Eigen::internal::sub_assign_op",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " Eigen::internal::sub_assign_op<typename DstScalar, typename SrcScalar>",
+      "score": 0.589321494102478,
+      "sortText": "40e9223asub_assign_op",
+      "textEdit": {
+        "newText": "Eigen::internal::sub_assign_op",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "subvector_stl_iterator",
+      "insertText": "Eigen::internal::subvector_stl_iterator",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " Eigen::internal::subvector_stl_iterator<typename XprType, DirectionType Direction>",
+      "score": 0.589321494102478,
+      "sortText": "40e9223asubvector_stl_iterator",
+      "textEdit": {
+        "newText": "Eigen::internal::subvector_stl_iterator",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "subvector_stl_reverse_iterator",
+      "insertText": "Eigen::internal::subvector_stl_reverse_iterator",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " Eigen::internal::subvector_stl_reverse_iterator<typename XprType, DirectionType Direction>",
+      "score": 0.589321494102478,
+      "sortText": "40e9223asubvector_stl_reverse_iterator",
+      "textEdit": {
+        "newText": "Eigen::internal::subvector_stl_reverse_iterator",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "subtractable",
+      "insertText": "boost::operators_impl::subtractable",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " boost::operators_impl::subtractable<class T, class U, class B, class O>",
+      "score": 0.5710139870643616,
+      "sortText": "40edd207subtractable",
+      "textEdit": {
+        "newText": "boost::operators_impl::subtractable",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <regex>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 14
+            },
+            "start": {
+              "character": 0,
+              "line": 14
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<regex>`  \nC++11 28.9 [re.submatch] Class template sub_match  \nA sequence of characters matched by a particular marked sub-expression.  \nAn object of this class is essentially a pair of iterators marking a matched subexpression within a regular expression pattern match. Such objects can be converted to and compared with std::basic_string objects of a similar base character type as the pattern matched by the regular expression.  \nThe iterators that make up the pair are the usual half-open interval referencing the actual original pattern matched."
+      },
+      "filterText": "sub_match",
+      "insertText": "std::sub_match",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•std::sub_match<typename BiIter>",
+      "score": 0.5643758773803711,
+      "sortText": "40ef8510sub_match",
+      "textEdit": {
+        "newText": "std::sub_match",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <random>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 14
+            },
+            "start": {
+              "character": 0,
+              "line": 14
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<random>`  \n@brief The Marsaglia-Zaman generator.  \nThis is a model of a Generalized Fibonacci discrete random number generator, sometimes referred to as the SWC generator.  \nA discrete random number generator that produces pseudorandom numbers using:  \n@f[ x\\_{i}\\\\leftarrow(x\\_{i - s} - x\\_{i - r} - carry\\_{i-1}) \\\\bmod m  \n@f]  \nThe size of the state is @f$r@f$ and the maximum period of the generator is @f$(m^r - m^s - 1)@f$."
+      },
+      "filterText": "subtract_with_carry_engine",
+      "insertText": "std::subtract_with_carry_engine",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•std::subtract_with_carry_engine<typename UIntType, size_t w, size_t s, size_t r>",
+      "score": 0.5643758773803711,
+      "sortText": "40ef8510subtract_with_carry_engine",
+      "textEdit": {
+        "newText": "std::subtract_with_carry_engine",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "Subsampling",
+      "insertText": "image::Subsampling",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " image::Subsampling",
+      "score": 0.4106861352920532,
+      "sortText": "412dba8cSubsampling",
+      "textEdit": {
+        "newText": "image::Subsampling",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "subtractable1",
+      "insertText": "boost::operators_impl::subtractable1",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " boost::operators_impl::subtractable1<class T, class B>",
+      "score": 0.39394426345825195,
+      "sortText": "41364cf0subtractable1",
+      "textEdit": {
+        "newText": "boost::operators_impl::subtractable1",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "subtractable2",
+      "insertText": "boost::operators_impl::subtractable2",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " boost::operators_impl::subtractable2<class T, class U, class B>",
+      "score": 0.39394426345825195,
+      "sortText": "41364cf0subtractable2",
+      "textEdit": {
+        "newText": "boost::operators_impl::subtractable2",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "subtractable2_left",
+      "insertText": "boost::operators_impl::subtractable2_left",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " boost::operators_impl::subtractable2_left<class T, class U, class B>",
+      "score": 0.39394426345825195,
+      "sortText": "41364cf0subtractable2_left",
+      "textEdit": {
+        "newText": "boost::operators_impl::subtractable2_left",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <ratio>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 14
+            },
+            "start": {
+              "character": 0,
+              "line": 14
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<ratio>`  \nratio_subtract"
+      },
+      "filterText": "ratio_subtract",
+      "insertText": "std::ratio_subtract",
+      "insertTextFormat": 1,
+      "kind": 8,
+      "label": "•std::ratio_subtract<typename R1, typename R2>",
+      "score": 0.6378918290138245,
+      "sortText": "41417ba3ratio_subtract",
+      "textEdit": {
+        "newText": "std::ratio_subtract",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "ConfidenceSubType",
+      "insertText": "baidu::imap::ConfidenceSubType",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " baidu::imap::ConfidenceSubType",
+      "score": 0.627130925655365,
+      "sortText": "4144b267ConfidenceSubType",
+      "textEdit": {
+        "newText": "baidu::imap::ConfidenceSubType",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "DividerSubType",
+      "insertText": "baidu::imap::DividerSubType",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " baidu::imap::DividerSubType",
+      "score": 0.627130925655365,
+      "sortText": "4144b267DividerSubType",
+      "textEdit": {
+        "newText": "baidu::imap::DividerSubType",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "JunctionSubType",
+      "insertText": "baidu::imap::JunctionSubType",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " baidu::imap::JunctionSubType",
+      "score": 0.627130925655365,
+      "sortText": "4144b267JunctionSubType",
+      "textEdit": {
+        "newText": "baidu::imap::JunctionSubType",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "ObjectSubType",
+      "insertText": "baidu::imap::ObjectSubType",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " baidu::imap::ObjectSubType",
+      "score": 0.627130925655365,
+      "sortText": "4144b267ObjectSubType",
+      "textEdit": {
+        "newText": "baidu::imap::ObjectSubType",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/influxdb/influxdb_config.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/influxdb/influxdb_config.pb.h\"`"
+      },
+      "filterText": "InfluxdbSubscription",
+      "insertText": "interface::influxdb::InfluxdbSubscription",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::influxdb::InfluxdbSubscription",
+      "score": 0.589321494102478,
+      "sortText": "414ffd43InfluxdbSubscription",
+      "textEdit": {
+        "newText": "interface::influxdb::InfluxdbSubscription",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/influxdb/influxdb_config.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/influxdb/influxdb_config.pb.h\"`"
+      },
+      "filterText": "InfluxdbSubscriptionDefaultTypeInternal",
+      "insertText": "interface::influxdb::InfluxdbSubscriptionDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::influxdb::InfluxdbSubscriptionDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "414ffd43InfluxdbSubscriptionDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::influxdb::InfluxdbSubscriptionDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/planner/planner_decision.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/planner/planner_decision.pb.h\"`"
+      },
+      "filterText": "LateralSubspaceFeasibilityType",
+      "insertText": "interface::planner::LateralSubspaceFeasibilityType",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::planner::LateralSubspaceFeasibilityType",
+      "score": 0.589321494102478,
+      "sortText": "414ffd43LateralSubspaceFeasibilityType",
+      "textEdit": {
+        "newText": "interface::planner::LateralSubspaceFeasibilityType",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/perception/perception.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/perception/perception.pb.h\"`"
+      },
+      "filterText": "PerceptionSubObstacle",
+      "insertText": "interface::perception::PerceptionSubObstacle",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::perception::PerceptionSubObstacle",
+      "score": 0.589321494102478,
+      "sortText": "414ffd43PerceptionSubObstacle",
+      "textEdit": {
+        "newText": "interface::perception::PerceptionSubObstacle",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/perception/perception.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/perception/perception.pb.h\"`"
+      },
+      "filterText": "PerceptionSubObstacleDefaultTypeInternal",
+      "insertText": "interface::perception::PerceptionSubObstacleDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::perception::PerceptionSubObstacleDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "414ffd43PerceptionSubObstacleDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::perception::PerceptionSubObstacleDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/planner/planner_decision.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/planner/planner_decision.pb.h\"`"
+      },
+      "filterText": "RerouteSubDeciderType",
+      "insertText": "interface::planner::RerouteSubDeciderType",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::planner::RerouteSubDeciderType",
+      "score": 0.589321494102478,
+      "sortText": "414ffd43RerouteSubDeciderType",
+      "textEdit": {
+        "newText": "interface::planner::RerouteSubDeciderType",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/planner/planner_decision.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/planner/planner_decision.pb.h\"`"
+      },
+      "filterText": "RerouteSubDeciderTypeDefaultTypeInternal",
+      "insertText": "interface::planner::RerouteSubDeciderTypeDefaultTypeInternal",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": "•interface::planner::RerouteSubDeciderTypeDefaultTypeInternal",
+      "score": 0.589321494102478,
+      "sortText": "414ffd43RerouteSubDeciderTypeDefaultTypeInternal",
+      "textEdit": {
+        "newText": "interface::planner::RerouteSubDeciderTypeDefaultTypeInternal",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "RoadBoundarySubType",
+      "insertText": "baidu::imap::RoadBoundarySubType",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " baidu::imap::RoadBoundarySubType",
+      "score": 0.627130925655365,
+      "sortText": "415f7459RoadBoundarySubType",
+      "textEdit": {
+        "newText": "baidu::imap::RoadBoundarySubType",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/map/map_roi.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/map/map_roi.pb.h\"`"
+      },
+      "filterText": "ROISemanticSubtype",
+      "insertText": "interface::map::roi::ROISemanticSubtype",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::map::roi::ROISemanticSubtype",
+      "score": 0.589321494102478,
+      "sortText": "4169223aROISemanticSubtype",
+      "textEdit": {
+        "newText": "interface::map::roi::ROISemanticSubtype",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "[3 overloads]",
+      "filterText": "SubRunner",
+      "insertText": "SubRunner",
+      "insertTextFormat": 1,
+      "kind": 4,
+      "label": " SubRunner(…)",
+      "score": 0.28225669264793396,
+      "sortText": "416f7c0dSubRunner",
+      "textEdit": {
+        "newText": "SubRunner",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "const value",
+      "documentation": {
+        "kind": "markdown",
+        "value": "A generic subprotocol error  \nIndicates that a subprotocol error occurred. Typically this involves receiving a message that is not formatted as a valid message for the subprotocol in use."
+      },
+      "filterText": "subprotocol_error",
+      "insertText": "websocketpp::close::status::subprotocol_error",
+      "insertTextFormat": 1,
+      "kind": 6,
+      "label": " websocketpp::close::status::subprotocol_error",
+      "score": 0.2266768515110016,
+      "sortText": "4197e206subprotocol_error",
+      "textEdit": {
+        "newText": "websocketpp::close::status::subprotocol_error",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "websocketpp::processor::error::processor_errors",
+      "documentation": {
+        "kind": "markdown",
+        "value": "Error parsing subprotocols"
+      },
+      "filterText": "subprotocol_parse_error",
+      "insertText": "websocketpp::processor::error::subprotocol_parse_error",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " websocketpp::processor::error::subprotocol_parse_error",
+      "score": 0.2266768515110016,
+      "sortText": "4197e206subprotocol_parse_error",
+      "textEdit": {
+        "newText": "websocketpp::processor::error::subprotocol_parse_error",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <GL/gl.h>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 5
+            },
+            "start": {
+              "character": 0,
+              "line": 5
+            }
+          }
+        }
+      ],
+      "detail": "void",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<GL/gl.h>`"
+      },
+      "filterText": "glTexSubImage1D",
+      "insertText": "glTexSubImage1D",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": "•glTexSubImage1D(GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const GLvoid *pixels)",
+      "score": 0.44738295674324036,
+      "sortText": "419af09fglTexSubImage1D",
+      "textEdit": {
+        "newText": "glTexSubImage1D",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <GL/gl.h>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 5
+            },
+            "start": {
+              "character": 0,
+              "line": 5
+            }
+          }
+        }
+      ],
+      "detail": "void",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<GL/gl.h>`"
+      },
+      "filterText": "glTexSubImage2D",
+      "insertText": "glTexSubImage2D",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": "•glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels)",
+      "score": 0.44738295674324036,
+      "sortText": "419af09fglTexSubImage2D",
+      "textEdit": {
+        "newText": "glTexSubImage2D",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <immintrin.h>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 5
+            },
+            "start": {
+              "character": 0,
+              "line": 5
+            }
+          }
+        }
+      ],
+      "detail": "unsigned char",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<immintrin.h>`"
+      },
+      "filterText": "_subborrow_u32",
+      "insertText": "_subborrow_u32",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": "•_subborrow_u32(unsigned char cf, unsigned int x, unsigned int y, unsigned int *p)",
+      "score": 0.3606823682785034,
+      "sortText": "41a88d69_subborrow_u32",
+      "textEdit": {
+        "newText": "_subborrow_u32",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <immintrin.h>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 5
+            },
+            "start": {
+              "character": 0,
+              "line": 5
+            }
+          }
+        }
+      ],
+      "detail": "unsigned char",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<immintrin.h>`"
+      },
+      "filterText": "_subborrow_u64",
+      "insertText": "_subborrow_u64",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": "•_subborrow_u64(unsigned char cf, unsigned long long x, unsigned long long y, unsigned long long *p)",
+      "score": 0.3606823682785034,
+      "sortText": "41a88d69_subborrow_u64",
+      "textEdit": {
+        "newText": "_subborrow_u64",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "documentation": {
+        "kind": "markdown",
+        "value": "The MQTT V5 subscribe options, apart from QoS which existed before V5."
+      },
+      "filterText": "MQTTSubscribe_options",
+      "insertText": "MQTTSubscribe_options",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " MQTTSubscribe_options",
+      "score": 0.34260880947113037,
+      "sortText": "41b3592cMQTTSubscribe_options",
+      "textEdit": {
+        "newText": "MQTTSubscribe_options",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "documentation": {
+        "kind": "markdown",
+        "value": "The MQTT V5 subscribe options, apart from QoS which existed before V5."
+      },
+      "filterText": "MQTTSubscribe_options",
+      "insertText": "MQTTSubscribe_options",
+      "insertTextFormat": 1,
+      "kind": 8,
+      "label": " MQTTSubscribe_options",
+      "score": 0.34260880947113037,
+      "sortText": "41b3592cMQTTSubscribe_options",
+      "textEdit": {
+        "newText": "MQTTSubscribe_options",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/can/can.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::can::CanBusType",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/can/can.pb.h\"`"
+      },
+      "filterText": "SUBDBW_MRCC",
+      "insertText": "interface::can::SUBDBW_MRCC",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::can::SUBDBW_MRCC",
+      "score": 0.2266768515110016,
+      "sortText": "41be91afSUBDBW_MRCC",
+      "textEdit": {
+        "newText": "interface::can::SUBDBW_MRCC",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "absl::cord_internal::CordRepKind",
+      "filterText": "SUBSTRING",
+      "insertText": "absl::cord_internal::SUBSTRING",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " absl::cord_internal::SUBSTRING",
+      "score": 0.2266768515110016,
+      "sortText": "41be91afSUBSTRING",
+      "textEdit": {
+        "newText": "absl::cord_internal::SUBSTRING",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/map/map_roi.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::map::roi::ROISemanticSubtype",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/map/map_roi.pb.h\"`"
+      },
+      "filterText": "SUBTYPE_MAX_ENUM_ID",
+      "insertText": "interface::map::roi::SUBTYPE_MAX_ENUM_ID",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::map::roi::SUBTYPE_MAX_ENUM_ID",
+      "score": 0.2266768515110016,
+      "sortText": "41be91afSUBTYPE_MAX_ENUM_ID",
+      "textEdit": {
+        "newText": "interface::map::roi::SUBTYPE_MAX_ENUM_ID",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceTypeEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SutengBpearl",
+      "insertText": "interface::driver::SutengBpearl",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SutengBpearl",
+      "score": 0.2266768515110016,
+      "sortText": "41be91afSutengBpearl",
+      "textEdit": {
+        "newText": "interface::driver::SutengBpearl",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "bool",
+      "filterText": "ShouldUseBase",
+      "insertText": "absl::container_internal::internal_compressed_tuple::ShouldUseBase",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " absl::container_internal::internal_compressed_tuple::ShouldUseBase<typename T>()",
+      "score": 0.2805400788784027,
+      "sortText": "41c07c11ShouldUseBase",
+      "textEdit": {
+        "newText": "absl::container_internal::internal_compressed_tuple::ShouldUseBase",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "void",
+      "filterText": "GetSubConnectedLaneSegments",
+      "insertText": "utils::router::GetSubConnectedLaneSegments",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " utils::router::GetSubConnectedLaneSegments(const interface::router::ConnectedLaneSegments &src_segment, double start_s, double end_s, interface::router::ConnectedLaneSegments *dest_segment)",
+      "score": 0.31978917121887207,
+      "sortText": "41c0fab0GetSubConnectedLaneSegments",
+      "textEdit": {
+        "newText": "utils::router::GetSubConnectedLaneSegments",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "interface::router::LaneChangeSegment",
+      "documentation": {
+        "kind": "markdown",
+        "value": "The lane_change_length will be used to calculate the start/end point on from path. If it is not provided, it will be calculated inside the function."
+      },
+      "filterText": "GetSubLaneChangeSegment",
+      "insertText": "utils::router::GetSubLaneChangeSegment",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " utils::router::GetSubLaneChangeSegment(const interface::router::LaneChangeSegment &lane_change_segment, double start_s, double end_s, std::optional<double> lane_change_length = std::nullopt)",
+      "score": 0.31978917121887207,
+      "sortText": "41c0fab0GetSubLaneChangeSegment",
+      "textEdit": {
+        "newText": "utils::router::GetSubLaneChangeSegment",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "interface::map::LaneSegment",
+      "filterText": "GetSubLaneSegment",
+      "insertText": "utils::router::GetSubLaneSegment",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " utils::router::GetSubLaneSegment(const interface::map::LaneSegment &lane_segment, double start_s_in_segment, double end_s_in_segment)",
+      "score": 0.31978917121887207,
+      "sortText": "41c0fab0GetSubLaneSegment",
+      "textEdit": {
+        "newText": "utils::router::GetSubLaneSegment",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "interface::router::RouterResult",
+      "filterText": "GetSubRoute",
+      "insertText": "utils::router::GetSubRoute",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " utils::router::GetSubRoute(const interface::router::RouterResult &router_result, double router_start_s, double router_end_s)",
+      "score": 0.31978917121887207,
+      "sortText": "41c0fab0GetSubRoute",
+      "textEdit": {
+        "newText": "utils::router::GetSubRoute",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "interface::router::RouteSegment",
+      "filterText": "GetSubRouteSegment",
+      "insertText": "utils::router::GetSubRouteSegment",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " utils::router::GetSubRouteSegment(const interface::router::RouteSegment &route_segment, double start_s, double end_s)",
+      "score": 0.31978917121887207,
+      "sortText": "41c0fab0GetSubRouteSegment",
+      "textEdit": {
+        "newText": "utils::router::GetSubRouteSegment",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "std::vector<std::string>",
+      "documentation": {
+        "kind": "markdown",
+        "value": "Gets all subdirectory names under path, non-recursive."
+      },
+      "filterText": "GetSubdirectoryNames",
+      "insertText": "file::path::GetSubdirectoryNames",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " file::path::GetSubdirectoryNames(const std::string &path)",
+      "score": 0.31978917121887207,
+      "sortText": "41c0fab0GetSubdirectoryNames",
+      "textEdit": {
+        "newText": "file::path::GetSubdirectoryNames",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "bool",
+      "documentation": {
+        "kind": "markdown",
+        "value": "determine if it is a sub-segment of another segment.  \nIf a lane segment is seperated into connected segments, it returns true only when the sub-segment has the same structure."
+      },
+      "filterText": "IsSubConnectedLaneSegments",
+      "insertText": "utils::router::IsSubConnectedLaneSegments",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " utils::router::IsSubConnectedLaneSegments(const interface::router::ConnectedLaneSegments &segment, const interface::router::ConnectedLaneSegments &sub_segment)",
+      "score": 0.31978917121887207,
+      "sortText": "41c0fab0IsSubConnectedLaneSegments",
+      "textEdit": {
+        "newText": "utils::router::IsSubConnectedLaneSegments",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "bool",
+      "filterText": "IsSubLaneChangeSegment",
+      "insertText": "utils::router::IsSubLaneChangeSegment",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " utils::router::IsSubLaneChangeSegment(const interface::router::LaneChangeSegment &segment, const interface::router::LaneChangeSegment &sub_segment)",
+      "score": 0.31978917121887207,
+      "sortText": "41c0fab0IsSubLaneChangeSegment",
+      "textEdit": {
+        "newText": "utils::router::IsSubLaneChangeSegment",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "DriverlessFaultInjectionSubTask",
+      "insertText": "ppov::DriverlessFaultInjectionSubTask",
+      "insertTextFormat": 1,
+      "kind": 7,
+      "label": " ppov::DriverlessFaultInjectionSubTask",
+      "score": 0.4379780888557434,
+      "sortText": "41c5211cDriverlessFaultInjectionSubTask",
+      "textEdit": {
+        "newText": "ppov::DriverlessFaultInjectionSubTask",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <immintrin.h>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 5
+            },
+            "start": {
+              "character": 0,
+              "line": 5
+            }
+          }
+        }
+      ],
+      "detail": "__m256i",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<immintrin.h>`"
+      },
+      "filterText": "_mm256_sub_epi16",
+      "insertText": "_mm256_sub_epi16",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": "•_mm256_sub_epi16(__m256i a, __m256i b)",
+      "score": 0.3606823682785034,
+      "sortText": "41c754a4_mm256_sub_epi16",
+      "textEdit": {
+        "newText": "_mm256_sub_epi16",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <immintrin.h>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 5
+            },
+            "start": {
+              "character": 0,
+              "line": 5
+            }
+          }
+        }
+      ],
+      "detail": "__m256i",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<immintrin.h>`"
+      },
+      "filterText": "_mm256_sub_epi8",
+      "insertText": "_mm256_sub_epi8",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": "•_mm256_sub_epi8(__m256i a, __m256i b)",
+      "score": 0.3606823682785034,
+      "sortText": "41c754a4_mm256_sub_epi8",
+      "textEdit": {
+        "newText": "_mm256_sub_epi8",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <immintrin.h>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 5
+            },
+            "start": {
+              "character": 0,
+              "line": 5
+            }
+          }
+        }
+      ],
+      "detail": "__m256i",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<immintrin.h>`"
+      },
+      "filterText": "_mm256_subs_epi16",
+      "insertText": "_mm256_subs_epi16",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": "•_mm256_subs_epi16(__m256i a, __m256i b)",
+      "score": 0.3606823682785034,
+      "sortText": "41c754a4_mm256_subs_epi16",
+      "textEdit": {
+        "newText": "_mm256_subs_epi16",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <immintrin.h>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 5
+            },
+            "start": {
+              "character": 0,
+              "line": 5
+            }
+          }
+        }
+      ],
+      "detail": "__m256i",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<immintrin.h>`"
+      },
+      "filterText": "_mm256_subs_epu16",
+      "insertText": "_mm256_subs_epu16",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": "•_mm256_subs_epu16(__m256i a, __m256i b)",
+      "score": 0.3606823682785034,
+      "sortText": "41c754a4_mm256_subs_epu16",
+      "textEdit": {
+        "newText": "_mm256_subs_epu16",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <immintrin.h>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 5
+            },
+            "start": {
+              "character": 0,
+              "line": 5
+            }
+          }
+        }
+      ],
+      "detail": "__m256i",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<immintrin.h>`"
+      },
+      "filterText": "_mm256_subs_epu8",
+      "insertText": "_mm256_subs_epu8",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": "•_mm256_subs_epu8(__m256i a, __m256i b)",
+      "score": 0.3606823682785034,
+      "sortText": "41c754a4_mm256_subs_epu8",
+      "textEdit": {
+        "newText": "_mm256_subs_epu8",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <emmintrin.h>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 5
+            },
+            "start": {
+              "character": 0,
+              "line": 5
+            }
+          }
+        }
+      ],
+      "detail": "__m128i",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<emmintrin.h>`  \nSubtracts the corresponding 16-bit integer values in the operands.  \n\\\\headerfile <x86intrin.h>  \nThis intrinsic corresponds to the \\<c> VPSUBW / PSUBW \\</c> instruction.  \n\\\\param \\_\\_a A 128-bit integer vector containing the minuends.  \n\\\\param \\_\\_b A 128-bit integer vector containing the subtrahends.  \n\\\\returns A 128-bit integer vector containing the differences of the values in the operands."
+      },
+      "filterText": "_mm_sub_epi16",
+      "insertText": "_mm_sub_epi16",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": "•_mm_sub_epi16(__m128i a, __m128i b)",
+      "score": 0.3606823682785034,
+      "sortText": "41c754a4_mm_sub_epi16",
+      "textEdit": {
+        "newText": "_mm_sub_epi16",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <emmintrin.h>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 5
+            },
+            "start": {
+              "character": 0,
+              "line": 5
+            }
+          }
+        }
+      ],
+      "detail": "__m128i",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<emmintrin.h>`  \nSubtracts the corresponding 32-bit integer values in the operands.  \n\\\\headerfile <x86intrin.h>  \nThis intrinsic corresponds to the \\<c> VPSUBD / PSUBD \\</c> instruction.  \n\\\\param \\_\\_a A 128-bit integer vector containing the minuends.  \n\\\\param \\_\\_b A 128-bit integer vector containing the subtrahends.  \n\\\\returns A 128-bit integer vector containing the differences of the values in the operands."
+      },
+      "filterText": "_mm_sub_epi32",
+      "insertText": "_mm_sub_epi32",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": "•_mm_sub_epi32(__m128i a, __m128i b)",
+      "score": 0.3606823682785034,
+      "sortText": "41c754a4_mm_sub_epi32",
+      "textEdit": {
+        "newText": "_mm_sub_epi32",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <emmintrin.h>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 5
+            },
+            "start": {
+              "character": 0,
+              "line": 5
+            }
+          }
+        }
+      ],
+      "detail": "__m128i",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<emmintrin.h>`  \nSubtracts the corresponding 8-bit integer values in the operands.  \n\\\\headerfile <x86intrin.h>  \nThis intrinsic corresponds to the \\<c> VPSUBB / PSUBB \\</c> instruction.  \n\\\\param \\_\\_a A 128-bit integer vector containing the minuends.  \n\\\\param \\_\\_b A 128-bit integer vector containing the subtrahends.  \n\\\\returns A 128-bit integer vector containing the differences of the values in the operands."
+      },
+      "filterText": "_mm_sub_epi8",
+      "insertText": "_mm_sub_epi8",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": "•_mm_sub_epi8(__m128i a, __m128i b)",
+      "score": 0.3606823682785034,
+      "sortText": "41c754a4_mm_sub_epi8",
+      "textEdit": {
+        "newText": "_mm_sub_epi8",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include <emmintrin.h>\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 5
+            },
+            "start": {
+              "character": 0,
+              "line": 5
+            }
+          }
+        }
+      ],
+      "detail": "__m128i",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `<emmintrin.h>`  \nSubtracts corresponding 16-bit unsigned integer values in the input and returns the differences in the corresponding bytes in the destination. Differences less than 0x0000 are saturated to 0x0000.  \n\\\\headerfile <x86intrin.h>  \nThis intrinsic corresponds to the \\<c> VPSUBUSW / PSUBUSW \\</c> instruction.  \n\\\\param \\_\\_a A 128-bit integer vector containing the minuends.  \n\\\\param \\_\\_b A 128-bit integer vector containing the subtrahends.  \n\\\\returns A 128-bit integer vector containing the unsigned integer differences of the values in the operands."
+      },
+      "filterText": "_mm_subs_epu16",
+      "insertText": "_mm_subs_epu16",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": "•_mm_subs_epu16(__m128i a, __m128i b)",
+      "score": 0.3606823682785034,
+      "sortText": "41c754a4_mm_subs_epu16",
+      "textEdit": {
+        "newText": "_mm_subs_epu16",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_BPEARL_BACK",
+      "insertText": "interface::driver::SUTENG_BPEARL_BACK",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_BPEARL_BACK",
+      "score": 0.2266768515110016,
+      "sortText": "41d1e984SUTENG_BPEARL_BACK",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_BPEARL_BACK",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_BPEARL_FRONT",
+      "insertText": "interface::driver::SUTENG_BPEARL_FRONT",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_BPEARL_FRONT",
+      "score": 0.2266768515110016,
+      "sortText": "41d1e984SUTENG_BPEARL_FRONT",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_BPEARL_FRONT",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_BPEARL_LEFT",
+      "insertText": "interface::driver::SUTENG_BPEARL_LEFT",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_BPEARL_LEFT",
+      "score": 0.2266768515110016,
+      "sortText": "41d1e984SUTENG_BPEARL_LEFT",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_BPEARL_LEFT",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_BPEARL_RIGHT",
+      "insertText": "interface::driver::SUTENG_BPEARL_RIGHT",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_BPEARL_RIGHT",
+      "score": 0.2266768515110016,
+      "sortText": "41d1e984SUTENG_BPEARL_RIGHT",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_BPEARL_RIGHT",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_BPEARL_V2",
+      "insertText": "interface::driver::SUTENG_BPEARL_V2",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_BPEARL_V2",
+      "score": 0.2266768515110016,
+      "sortText": "41d1e984SUTENG_BPEARL_V2",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_BPEARL_V2",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "additionalTextEdits": [
+        {
+          "newText": "#include \"common/interface/proto/driver/lidar_device_name.pb.h\"\n",
+          "range": {
+            "end": {
+              "character": 0,
+              "line": 20
+            },
+            "start": {
+              "character": 0,
+              "line": 20
+            }
+          }
+        }
+      ],
+      "detail": "interface::driver::LidarDeviceNameEnum",
+      "documentation": {
+        "kind": "markdown",
+        "value": "From `\"common/interface/proto/driver/lidar_device_name.pb.h\"`"
+      },
+      "filterText": "SUTENG_BPEARL_V3",
+      "insertText": "interface::driver::SUTENG_BPEARL_V3",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": "•interface::driver::SUTENG_BPEARL_V3",
+      "score": 0.2266768515110016,
+      "sortText": "41d1e984SUTENG_BPEARL_V3",
+      "textEdit": {
+        "newText": "interface::driver::SUTENG_BPEARL_V3",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "string_view",
+      "documentation": {
+        "kind": "markdown",
+        "value": "ClippedSubstr()  \nLike `s.substr(pos, n)`, but clips `pos` to an upper bound of `s.size()`.  \nProvided because std::string_view::substr throws if `pos > size()`"
+      },
+      "filterText": "ClippedSubstr",
+      "insertText": "absl::ClippedSubstr",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " absl::ClippedSubstr(string_view s, size_t pos, size_t n = string_view::npos)",
+      "score": 0.2805400788784027,
+      "sortText": "41d86c8eClippedSubstr",
+      "textEdit": {
+        "newText": "absl::ClippedSubstr",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "[4 overloads]",
+      "documentation": {
+        "kind": "markdown",
+        "value": "IsSubstring() and IsNotSubstring() are intended to be used as the first argument to {EXPECT,ASSERT}\\_PRED_FORMAT2(), not by themselves. They check whether needle is a substring of haystack (NULL is considered a substring of itself only), and return an appropriate error message when they fail.  \nThe {needle,haystack}\\_expr arguments are the stringified expressions that generated the two real arguments."
+      },
+      "filterText": "IsSubstring",
+      "insertText": "testing::IsSubstring",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " testing::IsSubstring(…)",
+      "score": 0.2805400788784027,
+      "sortText": "41d86c8eIsSubstring",
+      "textEdit": {
+        "newText": "testing::IsSubstring",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "[2 overloads]",
+      "documentation": {
+        "kind": "markdown",
+        "value": "Find substring (case insensitive)  \n@todo Is this still used? This method may not make sense.. should use iterators or be less generic. As is it is too tightly coupled to std::string  \n@param [in] haystack The string to search in  \n@param [in] needle The string to search for as a char array of values  \n@param [in] size Length of needle  \n@param [in] loc The locale to use for determining the case of values.  \nDefaults to the current locale.  \n@return An iterator to the first element of the first occurrance of needle in haystack. If the sequence is not found, the function returns haystack.end()"
+      },
+      "filterText": "ci_find_substr",
+      "insertText": "websocketpp::utility::ci_find_substr",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " websocketpp::utility::ci_find_substr(…)",
+      "score": 0.2871694564819336,
+      "sortText": "41ecf820ci_find_substr",
+      "textEdit": {
+        "newText": "websocketpp::utility::ci_find_substr",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "AssertionResult",
+      "filterText": "IsNotSubstring",
+      "insertText": "testing::IsNotSubstring",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " testing::IsNotSubstring(const char *needle_expr, const char *haystack_expr, const ::std::string &needle, const ::std::string &haystack)",
+      "score": 0.2805400788784027,
+      "sortText": "41f05d0dIsNotSubstring",
+      "textEdit": {
+        "newText": "testing::IsNotSubstring",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "std::string",
+      "documentation": {
+        "kind": "markdown",
+        "value": "Creates a new subfolder of specified parent_folder with the intended name. If a file or subfolder of parent_folder already has the same name as intended_subfolder_name, we will try to find a subfolder name that starts with intended_subfolder_name and is unique within the parent_folder.  \nReturns chosen subfolder name, e.g. \"${intended_subfolder_name}\\_2\"."
+      },
+      "filterText": "CreateNewUniqueSubfolder",
+      "insertText": "file::CreateNewUniqueSubfolder",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " file::CreateNewUniqueSubfolder(const std::string &parent_folder, const std::string &intended_subfolder_name)",
+      "score": 0.31978917121887207,
+      "sortText": "41f78e7eCreateNewUniqueSubfolder",
+      "textEdit": {
+        "newText": "file::CreateNewUniqueSubfolder",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "std::vector<std::string>",
+      "documentation": {
+        "kind": "markdown",
+        "value": "Return subfolders under the \"router_request\" folder."
+      },
+      "filterText": "GetRouterRequestSubfolders",
+      "insertText": "ppov::GetRouterRequestSubfolders",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " ppov::GetRouterRequestSubfolders()",
+      "score": 0.31978917121887207,
+      "sortText": "41f78e7eGetRouterRequestSubfolders",
+      "textEdit": {
+        "newText": "ppov::GetRouterRequestSubfolders",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "websocketpp::error::value",
+      "documentation": {
+        "kind": "markdown",
+        "value": "Invalid subprotocol"
+      },
+      "filterText": "invalid_subprotocol",
+      "insertText": "websocketpp::error::invalid_subprotocol",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " websocketpp::error::invalid_subprotocol",
+      "score": 0.2266768515110016,
+      "sortText": "41f8992einvalid_subprotocol",
+      "textEdit": {
+        "newText": "websocketpp::error::invalid_subprotocol",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "const value",
+      "documentation": {
+        "kind": "markdown",
+        "value": "A invalid subprotocol data  \nIndicates that data was received that violated the specification of the subprotocol in use."
+      },
+      "filterText": "invalid_subprotocol_data",
+      "insertText": "websocketpp::close::status::invalid_subprotocol_data",
+      "insertTextFormat": 1,
+      "kind": 6,
+      "label": " websocketpp::close::status::invalid_subprotocol_data",
+      "score": 0.2266768515110016,
+      "sortText": "41f8992einvalid_subprotocol_data",
+      "textEdit": {
+        "newText": "websocketpp::close::status::invalid_subprotocol_data",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "std::atomic<bool>",
+      "filterText": "shallow_subcords_enabled",
+      "insertText": "absl::cord_internal::shallow_subcords_enabled",
+      "insertTextFormat": 1,
+      "kind": 6,
+      "label": " absl::cord_internal::shallow_subcords_enabled",
+      "score": 0.2266768515110016,
+      "sortText": "41f8992eshallow_subcords_enabled",
+      "textEdit": {
+        "newText": "absl::cord_internal::shallow_subcords_enabled",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "websocketpp::error::value",
+      "documentation": {
+        "kind": "markdown",
+        "value": "Selected subprotocol was not requested by the client"
+      },
+      "filterText": "unrequested_subprotocol",
+      "insertText": "websocketpp::error::unrequested_subprotocol",
+      "insertTextFormat": 1,
+      "kind": 13,
+      "label": " websocketpp::error::unrequested_subprotocol",
+      "score": 0.2266768515110016,
+      "sortText": "41f8992eunrequested_subprotocol",
+      "textEdit": {
+        "newText": "websocketpp::error::unrequested_subprotocol",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "::fLS::clstring &",
+      "filterText": "FLAGS_pom_sub_version",
+      "insertText": "fLS::FLAGS_pom_sub_version",
+      "insertTextFormat": 1,
+      "kind": 6,
+      "label": " fLS::FLAGS_pom_sub_version",
+      "score": 0.23208187520503998,
+      "sortText": "42125921FLAGS_pom_sub_version",
+      "textEdit": {
+        "newText": "fLS::FLAGS_pom_sub_version",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "std::vector<std::string>",
+      "filterText": "RegexMatchSubDirs",
+      "insertText": "hdfs::RegexMatchSubDirs",
+      "insertTextFormat": 1,
+      "kind": 3,
+      "label": " hdfs::RegexMatchSubDirs(const std::string &base_dir, const std::string &regex, WebHdfsClient *hdfs_client)",
+      "score": 0.21430014073848724,
+      "sortText": "42248e81RegexMatchSubDirs",
+      "textEdit": {
+        "newText": "hdfs::RegexMatchSubDirs",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "const char[12]",
+      "filterText": "kFeatureMapSubdirectory",
+      "insertText": "path::kFeatureMapSubdirectory",
+      "insertTextFormat": 1,
+      "kind": 6,
+      "label": " path::kFeatureMapSubdirectory",
+      "score": 0.2445307821035385,
+      "sortText": "422f556fkFeatureMapSubdirectory",
+      "textEdit": {
+        "newText": "path::kFeatureMapSubdirectory",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "const char[11]",
+      "filterText": "kGroundMapSubdirectory",
+      "insertText": "path::kGroundMapSubdirectory",
+      "insertTextFormat": 1,
+      "kind": 6,
+      "label": " path::kGroundMapSubdirectory",
+      "score": 0.2445307821035385,
+      "sortText": "422f556fkGroundMapSubdirectory",
+      "textEdit": {
+        "newText": "path::kGroundMapSubdirectory",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "const char[13]",
+      "documentation": {
+        "kind": "markdown",
+        "value": "This is for the backward compatible. In our database, we still have many kind of router requests not just destinations, they cannot be deprecated in short-term. So we remain the concept of subfolder name, and ONLY overwrited the router requests in subfolder of kRouterRequestRemoteSubfolderName and kRouterRequestRemoteExpSubfolderName."
+      },
+      "filterText": "kRouterRequestRemoteSubfolderName",
+      "insertText": "ppov::kRouterRequestRemoteSubfolderName",
+      "insertTextFormat": 1,
+      "kind": 6,
+      "label": " ppov::kRouterRequestRemoteSubfolderName",
+      "score": 0.2445307821035385,
+      "sortText": "42591126kRouterRequestRemoteSubfolderName",
+      "textEdit": {
+        "newText": "ppov::kRouterRequestRemoteSubfolderName",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "bool",
+      "filterText": "FLAGS_aggressive_lc_lng_sub_decider",
+      "insertText": "fLB::FLAGS_aggressive_lc_lng_sub_decider",
+      "insertTextFormat": 1,
+      "kind": 6,
+      "label": " fLB::FLAGS_aggressive_lc_lng_sub_decider",
+      "score": 0.23208187520503998,
+      "sortText": "426190c0FLAGS_aggressive_lc_lng_sub_decider",
+      "textEdit": {
+        "newText": "fLB::FLAGS_aggressive_lc_lng_sub_decider",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "FLAGS_pom_sub_version",
+      "insertText": "FLAGS_pom_sub_version",
+      "insertTextFormat": 1,
+      "kind": 18,
+      "label": " FLAGS_pom_sub_version",
+      "score": 0.1515207290649414,
+      "sortText": "4264d7c0FLAGS_pom_sub_version",
+      "textEdit": {
+        "newText": "FLAGS_pom_sub_version",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "FLAGS_aggressive_lc_lng_sub_decider",
+      "insertText": "FLAGS_aggressive_lc_lng_sub_decider",
+      "insertTextFormat": 1,
+      "kind": 18,
+      "label": " FLAGS_aggressive_lc_lng_sub_decider",
+      "score": 0.1515207290649414,
+      "sortText": "42b11faaFLAGS_aggressive_lc_lng_sub_decider",
+      "textEdit": {
+        "newText": "FLAGS_aggressive_lc_lng_sub_decider",
+        "range": {
+          "end": {
+            "character": 7,
+            "line": 417
+          },
+          "start": {
+            "character": 4,
+            "line": 417
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "isIncomplete": null,
+  "items": [
+    {
+      "detail": "void",
+      "documentation": {
+        "kind": "markdown",
+        "value": "For performance reasons, if possible, it is recomended to use this function to give a hint on the number of tasks to be submitted. It's better if the hint is greater than or equal to the actual number of the submitted tasks. However, do not give a too big number, because it would lead to an excessive memory allocation."
+      },
+      "filterText": "HintNumTasks",
+      "insertText": "HintNumTasks",
+      "insertTextFormat": 1,
+      "kind": 2,
+      "label": " HintNumTasks(int num_tasks)",
+      "score": 0.9184742569923401,
+      "sortText": "4094dedfHintNumTasks",
+      "textEdit": {
+        "newText": "HintNumTasks",
+        "range": {
+          "end": {
+            "character": 14,
+            "line": 417
+          },
+          "start": {
+            "character": 14,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "std::vector<std::future<T>>",
+      "documentation": {
+        "kind": "markdown",
+        "value": "Participates until the tasks submitted \\_by this sub-runner\\_ are all done. Returns all the std::future<> of the submitted tasks since the last call to ParticipateUntilEmpty() or the beginning of this sub-runner."
+      },
+      "filterText": "ParticipateUntilEmpty",
+      "insertText": "ParticipateUntilEmpty",
+      "insertTextFormat": 1,
+      "kind": 2,
+      "label": " ParticipateUntilEmpty()",
+      "score": 0.9184742569923401,
+      "sortText": "4094dedfParticipateUntilEmpty",
+      "textEdit": {
+        "newText": "ParticipateUntilEmpty",
+        "range": {
+          "end": {
+            "character": 14,
+            "line": 417
+          },
+          "start": {
+            "character": 14,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "int",
+      "documentation": {
+        "kind": "markdown",
+        "value": "Returns the index of the submitted task. Sometimes, the user may want to find the result of a specific submitted task. The index returned here is helpful in this case. For instance, if the returned index is 3, the result of the submitted task can be retrieved via the 3rd element in the std::vector<std::future\\<T>> returned by ParticipateUntilEmpty()."
+      },
+      "filterText": "SubmitTask",
+      "insertText": "SubmitTask",
+      "insertTextFormat": 1,
+      "kind": 2,
+      "label": " SubmitTask(Args &&args...)",
+      "score": 0.9184742569923401,
+      "sortText": "4094dedfSubmitTask",
+      "textEdit": {
+        "newText": "SubmitTask",
+        "range": {
+          "end": {
+            "character": 14,
+            "line": 417
+          },
+          "start": {
+            "character": 14,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "detail": "std::vector<std::future<T>>",
+      "documentation": {
+        "kind": "markdown",
+        "value": "Wait until the tasks submitted \\_by this sub-runner\\_ are all done. The calling thread doesn't participate in completing the tasks. Returns all the std::future<> of the submitted tasks since the last call to ParticipateUntilEmpty() or the beginning of this sub-runner."
+      },
+      "filterText": "WaitUntilEmpty",
+      "insertText": "WaitUntilEmpty",
+      "insertTextFormat": 1,
+      "kind": 2,
+      "label": " WaitUntilEmpty()",
+      "score": 0.9184742569923401,
+      "sortText": "4094dedfWaitUntilEmpty",
+      "textEdit": {
+        "newText": "WaitUntilEmpty",
+        "range": {
+          "end": {
+            "character": 14,
+            "line": 417
+          },
+          "start": {
+            "character": 14,
+            "line": 417
+          }
+        }
+      }
+    },
+    {
+      "filterText": "template",
+      "insertText": "template",
+      "insertTextFormat": 1,
+      "kind": 14,
+      "label": " template",
+      "score": 0.8655150532722473,
+      "sortText": "40a26d9btemplate",
+      "textEdit": {
+        "newText": "template",
+        "range": {
+          "end": {
+            "character": 14,
+            "line": 417
+          },
+          "start": {
+            "character": 14,
+            "line": 417
+          }
+        }
+      }
+    }
+  ]
+}

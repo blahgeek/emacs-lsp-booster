@@ -1,0 +1,457 @@
+{
+  "diagnostics": [
+    {
+      "code": "undeclared_var_use_suggest",
+      "message": "Use of undeclared identifier 'sub'; did you mean 'fsub'? (fix available)",
+      "range": {
+        "end": {
+          "character": 7,
+          "line": 417
+        },
+        "start": {
+          "character": 4,
+          "line": 417
+        }
+      },
+      "relatedInformation": [],
+      "severity": 1,
+      "source": "clang"
+    },
+    {
+      "code": "expected_semi_after_expr",
+      "message": "Expected ';' after expression (fix available)",
+      "range": {
+        "end": {
+          "character": 3,
+          "line": 418
+        },
+        "start": {
+          "character": 2,
+          "line": 418
+        }
+      },
+      "relatedInformation": [],
+      "severity": 1,
+      "source": "clang"
+    },
+    {
+      "code": "-Wunused-value",
+      "message": "Expression result unused",
+      "range": {
+        "end": {
+          "character": 7,
+          "line": 417
+        },
+        "start": {
+          "character": 4,
+          "line": 417
+        }
+      },
+      "relatedInformation": [],
+      "severity": 1,
+      "source": "clang"
+    },
+    {
+      "code": "readability-identifier-length",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/readability/identifier-length.html"
+      },
+      "message": "Parameter name 'f' is too short, expected at least 3 characters",
+      "range": {
+        "end": {
+          "character": 53,
+          "line": 158
+        },
+        "start": {
+          "character": 52,
+          "line": 158
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "readability-identifier-length",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/readability/identifier-length.html"
+      },
+      "message": "Parameter name 'f' is too short, expected at least 3 characters",
+      "range": {
+        "end": {
+          "character": 66,
+          "line": 164
+        },
+        "start": {
+          "character": 65,
+          "line": 164
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "readability-identifier-length",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/readability/identifier-length.html"
+      },
+      "message": "Parameter name 'f' is too short, expected at least 3 characters",
+      "range": {
+        "end": {
+          "character": 92,
+          "line": 171
+        },
+        "start": {
+          "character": 91,
+          "line": 171
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "readability-identifier-length",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/readability/identifier-length.html"
+      },
+      "message": "Parameter name 'f' is too short, expected at least 3 characters",
+      "range": {
+        "end": {
+          "character": 63,
+          "line": 179
+        },
+        "start": {
+          "character": 62,
+          "line": 179
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "readability-identifier-length",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/readability/identifier-length.html"
+      },
+      "message": "Parameter name 'f' is too short, expected at least 3 characters",
+      "range": {
+        "end": {
+          "character": 42,
+          "line": 189
+        },
+        "start": {
+          "character": 41,
+          "line": 189
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "modernize-use-nodiscard",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/modernize/use-nodiscard.html"
+      },
+      "message": "Function 'GetNumThreads' should be marked [[nodiscard]] (fix available)",
+      "range": {
+        "end": {
+          "character": 5,
+          "line": 200
+        },
+        "start": {
+          "character": 2,
+          "line": 200
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "modernize-use-nodiscard",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/modernize/use-nodiscard.html"
+      },
+      "message": "Function 'HasUnfinishedTask' should be marked [[nodiscard]] (fix available)",
+      "range": {
+        "end": {
+          "character": 6,
+          "line": 205
+        },
+        "start": {
+          "character": 2,
+          "line": 205
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "modernize-use-nodiscard",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/modernize/use-nodiscard.html"
+      },
+      "message": "Function 'GetThreadIds' should be marked [[nodiscard]] (fix available)",
+      "range": {
+        "end": {
+          "character": 7,
+          "line": 209
+        },
+        "start": {
+          "character": 2,
+          "line": 209
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "modernize-use-nodiscard",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/modernize/use-nodiscard.html"
+      },
+      "message": "Function 'GetTids' should be marked [[nodiscard]] (fix available)",
+      "range": {
+        "end": {
+          "character": 7,
+          "line": 216
+        },
+        "start": {
+          "character": 2,
+          "line": 216
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "modernize-use-nodiscard",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/modernize/use-nodiscard.html"
+      },
+      "message": "Function 'GetThreadIndex' should be marked [[nodiscard]] (fix available)",
+      "range": {
+        "end": {
+          "character": 9,
+          "line": 224
+        },
+        "start": {
+          "character": 2,
+          "line": 224
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "readability-identifier-length",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/readability/identifier-length.html"
+      },
+      "message": "Parameter name 'f' is too short, expected at least 3 characters",
+      "range": {
+        "end": {
+          "character": 23,
+          "line": 235
+        },
+        "start": {
+          "character": 22,
+          "line": 235
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "readability-identifier-length",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/readability/identifier-length.html"
+      },
+      "message": "Parameter name 'f' is too short, expected at least 3 characters",
+      "range": {
+        "end": {
+          "character": 52,
+          "line": 259
+        },
+        "start": {
+          "character": 51,
+          "line": 259
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "readability-identifier-length",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/readability/identifier-length.html"
+      },
+      "message": "Parameter name 'f' is too short, expected at least 3 characters",
+      "range": {
+        "end": {
+          "character": 39,
+          "line": 266
+        },
+        "start": {
+          "character": 38,
+          "line": 266
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "readability-identifier-length",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/readability/identifier-length.html"
+      },
+      "message": "Parameter name 'f' is too short, expected at least 3 characters",
+      "range": {
+        "end": {
+          "character": 39,
+          "line": 275
+        },
+        "start": {
+          "character": 38,
+          "line": 275
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "cppcoreguidelines-avoid-non-const-global-variables",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/cppcoreguidelines/avoid-non-const-global-variables.html"
+      },
+      "message": "Variable 'vlocal__' provides global access to a non-const object; consider making the pointed-to data 'const'",
+      "range": {
+        "end": {
+          "character": 8,
+          "line": 281
+        },
+        "start": {
+          "character": 4,
+          "line": 281
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "readability-identifier-length",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/readability/identifier-length.html"
+      },
+      "message": "Parameter name 'f' is too short, expected at least 3 characters",
+      "range": {
+        "end": {
+          "character": 61,
+          "line": 300
+        },
+        "start": {
+          "character": 60,
+          "line": 300
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "readability-identifier-length",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/readability/identifier-length.html"
+      },
+      "message": "Parameter name 'f' is too short, expected at least 3 characters",
+      "range": {
+        "end": {
+          "character": 72,
+          "line": 329
+        },
+        "start": {
+          "character": 71,
+          "line": 329
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "cppcoreguidelines-avoid-non-const-global-variables",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/cppcoreguidelines/avoid-non-const-global-variables.html"
+      },
+      "message": "Variable 'vlocal__' provides global access to a non-const object; consider making the pointed-to data 'const'",
+      "range": {
+        "end": {
+          "character": 6,
+          "line": 353
+        },
+        "start": {
+          "character": 2,
+          "line": 353
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "readability-identifier-length",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/readability/identifier-length.html"
+      },
+      "message": "Parameter name 'f' is too short, expected at least 3 characters",
+      "range": {
+        "end": {
+          "character": 7,
+          "line": 392
+        },
+        "start": {
+          "character": 6,
+          "line": 392
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    },
+    {
+      "code": "readability-identifier-length",
+      "codeDescription": {
+        "href": "https://clang.llvm.org/extra/clang-tidy/checks/readability/identifier-length.html"
+      },
+      "message": "Variable name 's' is too short, expected at least 3 characters",
+      "range": {
+        "end": {
+          "character": 20,
+          "line": 430
+        },
+        "start": {
+          "character": 19,
+          "line": 430
+        }
+      },
+      "relatedInformation": [],
+      "severity": 2,
+      "source": "clang-tidy"
+    }
+  ],
+  "uri": "file:///home/yikai/Code/pony/.sub-repos/common/framework/module_interface/module_task_runner.h",
+  "version": 1185
+}

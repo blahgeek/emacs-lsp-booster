@@ -1,6 +1,8 @@
 use std::collections::BTreeMap;
 
+use anyhow::{Result, bail};
 use serde_json as json;
+use smallvec::smallvec;
 
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -12,6 +14,7 @@ enum LispObject {
     Float(String),  // use string for Eq and Ord
     Nil,
     T,
+    Vector(Vec<LispObject>),
 }
 
 impl LispObject {
@@ -19,183 +22,299 @@ impl LispObject {
         match self {
             LispObject::Symbol(s) => s.clone(),
             LispObject::Keyword(s) => format!(":{}", s),
-            // TODO: properly quote
-            LispObject::Str(s) => format!("\"{}\"", s.replace("\"", "\\\"").replace("\\", "\\\\")),
+            LispObject::Str(s) => {
+                let mut result = String::new();
+                result.push('"');
+                let mut last_is_escape = false;
+                for c in s.chars() {
+                    if c == '"' || c == '\\' {
+                        result.push('\\');
+                        result.push(c);
+                        last_is_escape = false;
+                    } else if (c as u32) < 32 || ((c as u32) > 126 && (c as u32) < 256) {
+                        result += &format!("\\{:o}", c as u32);
+                        last_is_escape = true;
+                    } else {
+                        // https://www.gnu.org/software/emacs/manual/html_node/elisp/Non_002dASCII-in-Strings.html
+                        if last_is_escape && ('0'..='8').contains(&c) {
+                            result += "\\ ";
+                        }
+                        result.push(c);
+                        last_is_escape = false;
+                    }
+                }
+                result.push('"');
+                result
+            },
             LispObject::Int(i) => i.to_string(),
             LispObject::Float(s) => s.clone(),
             LispObject::Nil => "nil".into(),
             LispObject::T => "t".into(),
+            LispObject::Vector(v) =>
+                format!("[{}]", v.iter().map(|x| x.to_repl()).collect::<Vec<_>>().join(" "))
+        }
+    }
+}
+
+// to support constants more than 65536 elements:
+// - for first 63536 slots, use it as normal
+// - in 63536-64536, put numbers 0-1000, for indexing
+// - for last 1000 slots (64536-65536), use two-level vector, 1000*1000, each is a 1000-element vector
+
+// cv: constant vector
+const CV_TWO_LEVEL_VECTOR_SIZE: u32 = 1000;
+const CV_NORMAL_SLOT_COUNT: u32 = (1 << 16) - CV_TWO_LEVEL_VECTOR_SIZE * 2;
+const CV_TWO_LEVEL_IDX_BEGIN: u32 = CV_NORMAL_SLOT_COUNT;
+const CV_TWO_LEVEL_DATA_BEGIN: u32 = CV_NORMAL_SLOT_COUNT + CV_TWO_LEVEL_VECTOR_SIZE;
+
+enum Op {
+    PushConstant(u32),  // support more than u16, will expand to multiple ops
+    Call(u16),
+    StackRef(u16),
+    Discard,
+    ASet,
+    Add1,
+    Cons,
+    Return,
+}
+
+impl Op {
+    fn get_stack_delta(&self) -> i32 {
+        match self {
+            &Self::PushConstant(_) => 1,
+            &Self::Call(n) => -(n as i32 + 1) + 1,
+            &Self::StackRef(_) => 1,
+            &Self::Discard => -1,
+            &Self::ASet => -3 + 1,
+            &Self::Add1 => 0,
+            &Self::Cons => -2 + 1,
+            &Self::Return => -1,
+        }
+    }
+
+    fn to_code(&self) -> Result<smallvec::SmallVec<[u8; 3]>> {
+        match self {
+            &Self::PushConstant(v) if v < 64 =>
+                Ok(smallvec![(192 + v) as u8]),
+            &Self::PushConstant(v) if v < CV_NORMAL_SLOT_COUNT =>
+                Ok(smallvec![129, (v & 0xff) as u8, (v >> 8) as u8]),
+            &Self::PushConstant(v) if v < (CV_NORMAL_SLOT_COUNT + CV_TWO_LEVEL_VECTOR_SIZE * CV_TWO_LEVEL_VECTOR_SIZE) => {
+                let mut result = smallvec![];
+                let two_level_i = (v - CV_NORMAL_SLOT_COUNT) / CV_TWO_LEVEL_VECTOR_SIZE;
+                let two_level_j = (v - CV_NORMAL_SLOT_COUNT) % CV_TWO_LEVEL_VECTOR_SIZE;
+
+                // get vector
+                let index_for_i = two_level_i + CV_TWO_LEVEL_DATA_BEGIN;
+                result.extend_from_slice(&[129, (index_for_i & 0xff) as u8, (index_for_i >> 8) as u8]);
+                // get index
+                let index_for_j = two_level_j + CV_TWO_LEVEL_IDX_BEGIN;
+                result.extend_from_slice(&[129, (index_for_j & 0xff) as u8, (index_for_j >> 8) as u8]);
+                // aref
+                result.push(72);
+
+                Ok(result)
+            },
+            &Self::PushConstant(v) =>
+                bail!("Too many constants! {}", v),
+            &Self::Call(v) if v <= 5 =>
+                Ok(smallvec![(32 + v) as u8]),
+            &Self::Call(v) if v < (1 << 8) =>
+                Ok(smallvec![(32 + 6) as u8, v as u8]),
+            &Self::Call(v) =>
+                Ok(smallvec![(32 + 7) as u8, (v & 0xff) as u8, (v >> 8) as u8]),
+            &Self::StackRef(v) if (1..=4).contains(&v) =>
+                Ok(smallvec![v as u8]),
+            &Self::StackRef(_) => unimplemented!(),
+            &Self::Discard => Ok(smallvec![136]),
+            &Self::ASet => Ok(smallvec![73]),
+            &Self::Add1 => Ok(smallvec![84]),
+            &Self::Cons => Ok(smallvec![66]),
+            &Self::Return => Ok(smallvec![135]),
         }
     }
 }
 
 
 // Only for generating json. Sequential execution only.
-struct BytecodeBuilder {
-    code: Vec<u8>,
-    constants: BTreeMap<LispObject, u32>,
-
-    current_stack_size: i32,
-    max_stack_size: i32,
+struct BytecodeCompiler {
+    ops: Vec<Op>,
+    constants: BTreeMap<LispObject, (u32, u32)>,  // (index, count)
 }
 
-lazy_static! {
-    static ref CONSTANT_FUNC_MAKE_VECTOR: LispObject = LispObject::Symbol("make-vector".to_string());
-}
-
-impl BytecodeBuilder {
-    fn create_or_get_constant(&mut self, obj: LispObject) -> u32 {
-        if let Some(&idx) = self.constants.get(&obj) {
-            return idx;
-        }
-        let next_id = self.constants.len() as u32;
-        self.constants.insert(obj, next_id);
-        return next_id;
+impl BytecodeCompiler {
+    fn compile_constant_op(&mut self, obj: LispObject) {
+        let idx = {
+            if let Some(idx_and_count) = self.constants.get_mut(&obj) {
+                idx_and_count.1 += 1;
+                idx_and_count.0
+            } else {
+                let next_id = self.constants.len() as u32;
+                self.constants.insert(obj, (next_id, 1));
+                next_id
+            }
+        };
+        self.ops.push(Op::PushConstant(idx))
     }
 
-    fn add_opcode<const N: usize>(&mut self, opcode: [u8; N], stack_delta: i32) {
-        assert!(self.current_stack_size + stack_delta >= 0);
-        self.current_stack_size += stack_delta;
-        self.max_stack_size = self.max_stack_size.max(self.current_stack_size);
-        self.code.extend(&opcode);
-    }
-
-    fn add_opcode_constant(&mut self, obj: LispObject) {
-        let idx = self.create_or_get_constant(obj);
-        if idx < 64 {
-            self.add_opcode([(192 + idx) as u8], 1);
-        } else if idx < (2<<16) {
-            // constant2
-            self.add_opcode([129, (idx & 0xff) as u8, (idx >> 8) as u8], 1);
-        } else {
-            unimplemented!();
-        }
-    }
-
-    fn add_opcode_call(&mut self, n_args: u16) {
-        // https://github.com/rocky/elisp-bytecode/issues/79
-        let delta = -(n_args as i32 + 1) + 1;
-        if n_args <= 5 {
-            self.add_opcode([(32 + n_args) as u8], delta);
-        } else if n_args < (1 << 8) {
-            self.add_opcode([(32 + 6), n_args as u8], delta);
-        } else {
-            self.add_opcode([(32 + 7), (n_args & 0xff) as u8, (n_args >> 8) as u8], delta);
-        }
-    }
-
-    fn build_one_value_array(&mut self, arr: &[json::Value]) {
+    fn compile_value_array(&mut self, arr: &[json::Value]) {
         if arr.len() < (1 << 16) {
             // use "vector" call
-            self.add_opcode_constant(LispObject::Symbol("vector".into()));
+            self.compile_constant_op(LispObject::Symbol("vector".into()));
             for value in arr {
-                self.build_one_value(value);
+                self.compile_value(value);
             }
-            self.add_opcode_call(arr.len() as u16);
+            self.ops.push(Op::Call(arr.len() as u16));
         } else {
             // fallback to make-vector & aset
-            self.add_opcode_constant(CONSTANT_FUNC_MAKE_VECTOR.clone());
-            self.add_opcode_constant(LispObject::Int(arr.len() as i64));
-            self.add_opcode_constant(LispObject::Nil);
-            self.add_opcode([32 + 2], -3 + 1);  // call
+            self.compile_constant_op(LispObject::Symbol("make-vector".into()));
+            self.compile_constant_op(LispObject::Int(arr.len() as i64));
+            self.compile_constant_op(LispObject::Nil);
+            self.ops.push(Op::Call(2));
 
-            self.add_opcode_constant(LispObject::Int(0)); // index for aset
+            self.compile_constant_op(LispObject::Int(0)); // index for aset
 
             for value in arr {
-                self.add_opcode([1], 1);  // stack ref 1, the vector
-                self.add_opcode([1], 1);  // stack ref 1, the index
-                self.build_one_value(value);
-                self.add_opcode([73], -3+1);  // aset
-                self.add_opcode([136], -1);   // discard aset result
-                self.add_opcode([84], 0);     // add1
+                self.ops.push(Op::StackRef(1));  // the vector
+                self.ops.push(Op::StackRef(1));  // the index
+                self.compile_value(value);
+                self.ops.push(Op::ASet);
+                self.ops.push(Op::Discard);  // discard aset result
+                self.ops.push(Op::Add1);
             }
-            self.add_opcode([136], -1);   // discard index
+            self.ops.push(Op::Discard);   // discard index
             // the vector remains
         }
     }
 
-    fn build_one_value_map(&mut self, map: &json::Map<String, json::Value>) {
+    fn compile_value_map(&mut self, map: &json::Map<String, json::Value>) {
         // list
         let list_len = map.len() * 2;
         let use_list_call = list_len < (1 << 16);
         if use_list_call {
-            self.add_opcode_constant(LispObject::Symbol("list".into()));
+            self.compile_constant_op(LispObject::Symbol("list".into()));
         }
 
         for (key, value) in map {
-            self.add_opcode_constant(LispObject::Keyword(key.clone()));
-            self.build_one_value(value);
+            self.compile_constant_op(LispObject::Keyword(key.clone()));
+            self.compile_value(value);
         }
 
         if use_list_call {
-            self.add_opcode_call(list_len as u16);
+            self.ops.push(Op::Call(list_len as u16));
         } else {
-            self.add_opcode_constant(LispObject::Nil);
+            self.compile_constant_op(LispObject::Nil);
             for _ in 0..list_len {
-                self.add_opcode([66], -2 + 1);  // cons
+                self.ops.push(Op::Cons);
             }
         }
     }
 
     // current only support:
     // object-type: plist,  null-object: nil,  false-object: nil,  array-type: vector
-    fn build_one_value(&mut self, value: &json::Value) {
+    fn compile_value(&mut self, value: &json::Value) {
         match value {
             &json::Value::Null | &json::Value::Bool(false) => {
-                self.add_opcode_constant(LispObject::Nil);
+                self.compile_constant_op(LispObject::Nil);
             },
             &json::Value::Bool(true) => {
-                self.add_opcode_constant(LispObject::T);
+                self.compile_constant_op(LispObject::T);
             },
             &json::Value::Number(ref num) => {
                 if num.is_f64() {
-                    self.add_opcode_constant(LispObject::Float(num.to_string()));
+                    self.compile_constant_op(LispObject::Float(num.to_string()));
                 } else {
-                    self.add_opcode_constant(LispObject::Int(num.as_i64().unwrap()));
+                    self.compile_constant_op(LispObject::Int(num.as_i64().unwrap()));
                 }
             },
             &json::Value::String(ref s) => {
-                self.add_opcode_constant(LispObject::Str(s.clone()));
+                self.compile_constant_op(LispObject::Str(s.clone()));
             },
             &json::Value::Array(ref arr) => {
-                self.build_one_value_array(&arr);
+                self.compile_value_array(&arr);
             },
             &json::Value::Object(ref map) => {
-                self.build_one_value_map(&map);
+                self.compile_value_map(&map);
             },
         }
     }
 
-    fn build(&mut self, value: &json::Value) {
-        self.build_one_value(value);
-        self.add_opcode([135], -1);   // return
+    fn compile(&mut self, value: &json::Value) {
+        self.compile_value(value);
+        self.ops.push(Op::Return);
     }
 
-    fn into_repl(self) -> String {
-        let mut result: String = "#[0 \"".into();
-        for c in self.code {
-            result.push_str(&format!("\\{:o}", c));
-        }
-        result += "\" [";
-
+    // return (code, constants, max_stack_size)
+    fn into_bytecode(self) -> Result<(Vec<u8>, Vec<LispObject>, i32)> {
+        // optimize constants vector, sort by usage
         let mut constants_array = self.constants.into_iter().collect::<Vec<_>>();
-        constants_array.sort_by_key(|(_, idx)| *idx);
-        result += &constants_array.into_iter()
-            .map(|(obj, _)| obj.to_repl())
-            .collect::<Vec<_>>().join(" ");
+        constants_array.sort_by_key(
+            // if count is same, still sort by the old idx, to increase locality
+            |(_, idx_and_count)| (-(idx_and_count.1 as i32), idx_and_count.0));
+        let index_remap = constants_array.iter().enumerate()
+            .map(|(new_idx, (_, idx_and_count))| (idx_and_count.0, new_idx as u32))
+            .collect::<BTreeMap<_, _>>();
 
-        result += &format!("] {}]", self.max_stack_size);
-        return result;
+        let mut constants_array = constants_array.into_iter().map(|(obj, _)| obj).collect::<Vec<_>>();
+        // rearrange constants
+        let mut two_level_vectors: Vec<LispObject> = Vec::new();
+        // collect two level vectors from the end (reverse order)
+        while constants_array.len() > CV_NORMAL_SLOT_COUNT as usize {
+            let len = {
+                let remaining = (constants_array.len() - CV_NORMAL_SLOT_COUNT as usize) % CV_TWO_LEVEL_VECTOR_SIZE as usize;
+                if remaining == 0 {
+                    CV_TWO_LEVEL_VECTOR_SIZE as usize
+                } else {
+                    remaining
+                }
+            };
+            let v = constants_array
+                .splice((constants_array.len() - len)..constants_array.len(), Vec::new())
+                .collect();
+            two_level_vectors.push(LispObject::Vector(v));
+        }
+        two_level_vectors.reverse();
+
+        if !two_level_vectors.is_empty() {
+            debug_assert_eq!(constants_array.len(), CV_NORMAL_SLOT_COUNT as usize);
+            for i in 0..CV_TWO_LEVEL_VECTOR_SIZE {
+                constants_array.push(LispObject::Int(i as i64));
+            }
+            constants_array.extend(two_level_vectors);
+        }
+
+        let mut code: Vec<u8> = Vec::new();
+        let mut current_stack_size = 0;
+        let mut max_stack_size = 0;
+        for op in self.ops {
+            let op = if let Op::PushConstant(v) = op {
+                Op::PushConstant(index_remap[&v])
+            } else {
+                op
+            };
+            code.extend(op.to_code()?);
+            current_stack_size += op.get_stack_delta();
+            debug_assert!(current_stack_size >= 0);
+            max_stack_size = i32::max(current_stack_size, max_stack_size);
+        }
+
+        // some buffer for max stack size (for the PushConstant variant)
+        Ok((code, constants_array, max_stack_size + 8))
+    }
+
+    fn into_repl(self) -> Result<String> {
+        let (code, constants, max_stack_size) = self.into_bytecode()?;
+        Ok(format!("#[0 {} {} {}]",
+                   LispObject::Str(code.into_iter().map(|x| x as char).collect()).to_repl(),
+                   LispObject::Vector(constants).to_repl(),
+                   max_stack_size))
     }
 }
 
-pub fn generate_bytecode_repl(value: &json::Value) -> String {
-    let mut builder = BytecodeBuilder {
-        code: Vec::new(),
+pub fn generate_bytecode_repl(value: &json::Value) -> Result<String> {
+    let mut compiler = BytecodeCompiler {
+        ops: Vec::new(),
         constants: BTreeMap::new(),
-        current_stack_size: 0,
-        max_stack_size: 0,
     };
-    builder.build(value);
-    return builder.into_repl();
+    compiler.compile(value);
+    compiler.into_repl()
 }
