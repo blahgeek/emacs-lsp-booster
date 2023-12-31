@@ -1,1 +1,3 @@
-pub mod bytecode;
+mod bytecode;
+mod rpcio;
+pub mod app;
