@@ -1,5 +1,6 @@
 use std::{str::FromStr, io::Write};
 
+use log::debug;
 use anyhow::{Result, bail};
 
 // return empty string on EOF
@@ -19,10 +20,11 @@ pub fn rpc_read(reader: &mut impl std::io::BufRead) -> Result<String> {
                 return Ok(String::from_utf8(result)?);
             }
         }
-        let splitted: Vec<&str> = line.splitn(2, ": ").collect();
+        let splitted: Vec<&str> = line.trim().splitn(2, ": ").collect();
         if splitted.len() != 2 {
             bail!("Invalid header format");
         }
+        debug!("Header: {:?}", splitted);
         if splitted[0] == "Content-Length" {
             content_len = Some(usize::from_str(splitted[1])?);
         }
