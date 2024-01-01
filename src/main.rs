@@ -9,6 +9,7 @@ fn main() -> Result<()> {
         bail!("Usage: {} LSP_SERVER_CMD ARGS...", args[0]);
     }
 
+    env_logger::init();
     let mut cmd = std::process::Command::new(&args[1]);
     cmd.args(&args[1..]);
 
