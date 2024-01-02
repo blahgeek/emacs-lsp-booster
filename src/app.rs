@@ -87,6 +87,7 @@ fn process_server_reader(reader: impl std::io::Read,
 pub fn run_app_forever(client_reader: impl std::io::Read + Send + 'static,
                        client_writer: impl std::io::Write + Send + 'static,
                        mut server_cmd: std::process::Command) -> Result<()> {
+    info!("Running server {:?}", server_cmd);
     let proc = server_cmd
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())

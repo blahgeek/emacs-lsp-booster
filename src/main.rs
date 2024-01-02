@@ -22,7 +22,7 @@ fn main() -> Result<()> {
     }));
 
     let mut cmd = std::process::Command::new(&args[1]);
-    cmd.args(&args[1..]);
+    cmd.args(&args[2..]);
 
     app::run_app_forever(std::io::stdin(), std::io::stdout(), cmd)
 }
