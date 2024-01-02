@@ -71,7 +71,7 @@ fn process_server_reader(reader: impl std::io::Read,
             break
         }
         let json_val = json::from_str(&msg)?;
-        match bytecode::generate_bytecode_repl(&json_val) {
+        match bytecode::generate_bytecode_repl(&json_val, bytecode::BytecodeOptions::default()) {
             Ok(bytecode_str) => {
                 channel_pub.send(bytecode_str)?;
             },

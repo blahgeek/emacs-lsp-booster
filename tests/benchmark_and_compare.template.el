@@ -19,6 +19,21 @@
       (setq p (cddr p)))
     (sort res (lambda (a b) (string< (symbol-name (car a)) (symbol-name (car b)))))))
 
+(defun -hashtable-to-sorted-alist (h)
+  (let (res)
+    (maphash (lambda (k v) (push (cons k v) res)) h)
+    (sort res (lambda (a b) (string< (car a) (car b))))))
+
+(defun -check-equal-sorted-alist (a-alist b-alist)
+  (let ((res t))
+    (while a-alist
+      (unless (and (equal (caar a-alist) (caar b-alist))
+                   (json-equal (cdar a-alist) (cdar b-alist)))
+        (setq res nil))
+      (setq a-alist (cdr a-alist)
+            b-alist (cdr b-alist)))
+    res))
+
 (defun json-equal (a b)
   (pcase a
     ((or
@@ -36,16 +51,13 @@
     ((pred plistp)
      (and (plistp b)
           (equal (length a) (length b))
-          (let ((a-alist (-plist-to-sorted-alist a))
-                (b-alist (-plist-to-sorted-alist b))
-                (res t))
-            (while a-alist
-              (unless (and (equal (caar a-alist) (caar b-alist))
-                           (json-equal (cdar a-alist) (cdar b-alist)))
-                (setq res nil))
-              (setq a-alist (cdr a-alist)
-                    b-alist (cdr b-alist)))
-            res)))
+          (-check-equal-sorted-alist (-plist-to-sorted-alist a)
+                                     (-plist-to-sorted-alist b))))
+    ((pred hash-table-p)
+     (and (hash-table-p b)
+          (equal (hash-table-count a) (hash-table-count b))
+          (-check-equal-sorted-alist (-hashtable-to-sorted-alist a)
+                                     (-hashtable-to-sorted-alist b))))
     (_ nil)))
 
 (let ((json-str (with-temp-buffer
@@ -54,15 +66,17 @@
       (bytecode-str (with-temp-buffer
                       (insert-file-contents "{}")
                       (buffer-string)))
+      (object-type (if (equal "{}" "plist") 'plist 'hash-table))
       json-val bytecode-val)
+  (message "Object-type: %s" object-type)
   (unless (json-equal (setq json-val
-                            (json-parse-string json-str :object-type 'plist :null-object nil :false-object nil))
+                            (json-parse-string json-str :object-type object-type :null-object nil :false-object nil))
                       (setq bytecode-val
                             (funcall (read bytecode-str))))
     (error "NOT EQUAL!"))
   (message "Benchmark json-parse-string 100 times: %s"
            (benchmark-run 100
-             (json-parse-string json-str :object-type 'plist :null-object nil :false-object nil)))
+             (json-parse-string json-str :object-type object-type :null-object nil :false-object nil)))
   (message "Benchmark read-bytecode 100 times: %s"
            (benchmark-run 100
              (read bytecode-str)))
@@ -73,5 +87,5 @@
     (message "Benchmark read-lisp-data 100 times: %s"
              (benchmark-run 100
                (read lisp-str))))
-  
+
   (message "PASS!"))

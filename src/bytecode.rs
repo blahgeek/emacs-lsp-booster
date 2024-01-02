@@ -6,7 +6,7 @@ use smallvec::smallvec;
 
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-enum LispObject {
+pub enum LispObject {
     Symbol(String),
     Keyword(String),
     Str(String),
@@ -139,9 +139,34 @@ impl Op {
     }
 }
 
+#[derive(Clone, Copy)]
+pub enum ObjectType {
+    Plist,
+    Hashtable,
+    // TODO: Alist,
+}
+
+pub struct BytecodeOptions {
+    pub object_type: ObjectType,
+    // TODO: array_type
+    pub null_object: LispObject,
+    pub false_object: LispObject,
+}
+
+impl Default for BytecodeOptions {
+    fn default() -> Self {
+        Self {
+            object_type: ObjectType::Plist,
+            null_object: LispObject::Nil,
+            false_object: LispObject::Nil,
+        }
+    }
+}
 
 // Only for generating json. Sequential execution only.
 struct BytecodeCompiler {
+    options: BytecodeOptions,
+
     ops: Vec<Op>,
     constants: BTreeMap<LispObject, (u32, u32)>,  // (index, count)
 }
@@ -191,7 +216,7 @@ impl BytecodeCompiler {
         }
     }
 
-    fn compile_value_map(&mut self, map: &json::Map<String, json::Value>) {
+    fn compile_value_map_plist(&mut self, map: &json::Map<String, json::Value>) {
         let list_len = map.len() * 2;
         // see below
         if list_len < (1 << 16) && list_len >= (1 << 8) {
@@ -218,12 +243,31 @@ impl BytecodeCompiler {
         }
     }
 
-    // current only support:
-    // object-type: plist,  null-object: nil,  false-object: nil,  array-type: vector
+    fn compile_value_map_hashtable(&mut self, map: &json::Map<String, json::Value>) {
+        self.compile_constant_op(LispObject::Symbol("make-hash-table".into()));
+        self.compile_constant_op(LispObject::Keyword("test".into()));
+        self.compile_constant_op(LispObject::Symbol("equal".into()));
+        self.compile_constant_op(LispObject::Keyword("size".into()));
+        self.compile_constant_op(LispObject::Int(map.len() as i64));
+        self.ops.push(Op::Call(4));
+
+        for (key, value) in map {
+            self.compile_constant_op(LispObject::Symbol("puthash".into()));
+            self.compile_constant_op(LispObject::Str(key.clone()));
+            self.compile_value(value);
+            self.ops.push(Op::StackRef(3));
+            self.ops.push(Op::Call(3));
+            self.ops.push(Op::Discard);
+        }
+    }
+
     fn compile_value(&mut self, value: &json::Value) {
         match value {
-            &json::Value::Null | &json::Value::Bool(false) => {
-                self.compile_constant_op(LispObject::Nil);
+            &json::Value::Null => {
+                self.compile_constant_op(self.options.null_object.clone());
+            },
+            &json::Value::Bool(false) => {
+                self.compile_constant_op(self.options.false_object.clone());
             },
             &json::Value::Bool(true) => {
                 self.compile_constant_op(LispObject::T);
@@ -242,7 +286,10 @@ impl BytecodeCompiler {
                 self.compile_value_array(&arr);
             },
             &json::Value::Object(ref map) => {
-                self.compile_value_map(&map);
+                match self.options.object_type {
+                    ObjectType::Plist => self.compile_value_map_plist(&map),
+                    ObjectType::Hashtable => self.compile_value_map_hashtable(&map),
+                };
             },
         }
     }
@@ -319,8 +366,9 @@ impl BytecodeCompiler {
     }
 }
 
-pub fn generate_bytecode_repl(value: &json::Value) -> Result<String> {
+pub fn generate_bytecode_repl(value: &json::Value, options: BytecodeOptions) -> Result<String> {
     let mut compiler = BytecodeCompiler {
+        options,
         ops: Vec::new(),
         constants: BTreeMap::new(),
     };
