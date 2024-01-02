@@ -86,9 +86,9 @@ fn process_server_reader(reader: impl std::io::Read,
 
 pub fn run_app_forever(client_reader: impl std::io::Read + Send + 'static,
                        client_writer: impl std::io::Write + Send + 'static,
-                       mut server_cmd: std::process::Command) -> Result<()> {
+                       mut server_cmd: std::process::Command) -> Result<std::process::ExitStatus> {
     info!("Running server {:?}", server_cmd);
-    let proc = server_cmd
+    let mut proc = server_cmd
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::inherit())
@@ -98,37 +98,35 @@ pub fn run_app_forever(client_reader: impl std::io::Read + Send + 'static,
     let c2s_channel_counter = Arc::new(AtomicI32::new(0));
     let (s2c_channel_pub, s2c_channel_sub) = mpsc::channel::<String>();
 
-    let threads = vec![
-        {
-            let c2s_channel_counter = c2s_channel_counter.clone();
-            std::thread::spawn(move || {
-                info!("Started client->server write thread");
-                process_channel_to_writer(c2s_channel_sub, Some(c2s_channel_counter), proc.stdin.unwrap()).unwrap();
-                info!("Finished client->server write thread");
-            })
-        },
+    {
+        let c2s_channel_counter = c2s_channel_counter.clone();
+        let proc_stdin = proc.stdin.take().unwrap();
         std::thread::spawn(move || {
-            info!("Started server->client write thread");
-            process_channel_to_writer(s2c_channel_sub, None, client_writer).unwrap();
-            info!("Finished server->client write thread");
-        }),
-        {
-            let s2c_channel_pub = s2c_channel_pub.clone();
-            std::thread::spawn(move || {
-                info!("Started server->client read thread");
-                process_server_reader(proc.stdout.unwrap(), s2c_channel_pub).unwrap();
-                info!("Finished server->client read thread");
-            })
-        },
+            info!("Started client->server write thread");
+            process_channel_to_writer(c2s_channel_sub, Some(c2s_channel_counter), proc_stdin).unwrap();
+            info!("Finished client->server write thread");
+        });
+    }
+    std::thread::spawn(move || {
+        info!("Started server->client write thread");
+        process_channel_to_writer(s2c_channel_sub, None, client_writer).unwrap();
+        info!("Finished server->client write thread");
+    });
+    {
+        let s2c_channel_pub = s2c_channel_pub.clone();
+        let proc_stdout = proc.stdout.take().unwrap();
         std::thread::spawn(move || {
-            info!("Started client->server read thread");
-            process_client_reader(
-                client_reader, c2s_channel_pub, c2s_channel_counter, s2c_channel_pub).unwrap();
-            info!("Finished client->server read thread");
-        }),
-    ];
+            info!("Started server->client read thread");
+            process_server_reader(proc_stdout, s2c_channel_pub).unwrap();
+            info!("Finished server->client read thread");
+        });
+    }
+    std::thread::spawn(move || {
+        info!("Started client->server read thread");
+        process_client_reader(
+            client_reader, c2s_channel_pub, c2s_channel_counter, s2c_channel_pub).unwrap();
+        info!("Finished client->server read thread");
+    });
 
-    threads.into_iter().for_each(|x| x.join().unwrap());
-
-    Ok(())
+    Ok(proc.wait()?)
 }
