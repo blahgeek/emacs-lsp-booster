@@ -203,8 +203,10 @@ impl BytecodeCompiler {
             self.compile_value(value);
         }
 
-        // three modes: 1. list op; 2. list call; 3. recursive cons
-        if list_len < (1 << 8) {
+        // four modes: 0. (empty) just nil 1. list op; 2. list call; 3. recursive cons
+        if list_len == 0 {
+            self.compile_constant_op(LispObject::Nil);
+        } else if list_len < (1 << 8) {
             self.ops.push(Op::List(list_len as u8));
         } else if list_len < (1 << 16) {
             self.ops.push(Op::Call(list_len as u16));
