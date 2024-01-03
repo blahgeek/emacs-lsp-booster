@@ -23,6 +23,11 @@
   (and (listp x)
        (-all (lambda (e) (and (consp e) (symbolp (car e)))) x)))
 
+(defun -plistp (x)
+  (and (listp x)
+       x
+       (keywordp (car x))))
+
 (defun -sort-alist (x)
   (sort x (lambda (a b) (string< (symbol-name (car a)) (symbol-name (car b))))))
 
@@ -60,8 +65,8 @@
           (equal (length a) (length b))
           (-check-equal-sorted-alist (-sort-alist a)
                                      (-sort-alist b))))
-    ((pred plistp)
-     (and (plistp b)
+    ((pred -plistp)  ;; plistp is not available before emacs29
+     (and (-plistp b)
           (equal (length a) (length b))
           (-check-equal-sorted-alist (-plist-to-sorted-alist a)
                                      (-plist-to-sorted-alist b))))
