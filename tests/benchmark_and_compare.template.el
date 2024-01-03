@@ -19,6 +19,13 @@
       (setq p (cddr p)))
     (sort res (lambda (a b) (string< (symbol-name (car a)) (symbol-name (car b)))))))
 
+(defun -alistp (x)
+  (and (listp x)
+       (-all (lambda (e) (and (consp e) (symbolp (car e)))) x)))
+
+(defun -sort-alist (x)
+  (sort x (lambda (a b) (string< (symbol-name (car a)) (symbol-name (car b))))))
+
 (defun -hashtable-to-sorted-alist (h)
   (let (res)
     (maphash (lambda (k v) (push (cons k v) res)) h)
@@ -48,6 +55,11 @@
           (equal (length a) (length b))
           (-all (lambda (idx) (json-equal (aref a idx) (aref b idx)))
                  (number-sequence 0 (1- (length a))))))
+    ((pred -alistp)
+     (and (-alistp b)
+          (equal (length a) (length b))
+          (-check-equal-sorted-alist (-sort-alist a)
+                                     (-sort-alist b))))
     ((pred plistp)
      (and (plistp b)
           (equal (length a) (length b))
@@ -66,7 +78,7 @@
       (bytecode-str (with-temp-buffer
                       (insert-file-contents "{}")
                       (buffer-string)))
-      (object-type (if (equal "{}" "plist") 'plist 'hash-table))
+      (object-type (intern "{}"))
       json-val bytecode-val)
   (message "Object-type: %s" object-type)
   (unless (json-equal (setq json-val

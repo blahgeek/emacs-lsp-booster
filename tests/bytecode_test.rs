@@ -30,7 +30,8 @@ fn run_one_test(json_str: &str, object_type: bytecode::ObjectType) -> Result<()>
                              bytecode_file.display(),
                              match object_type {
                                  bytecode::ObjectType::Plist => "plist",
-                                 bytecode::ObjectType::Hashtable => "hashtable",
+                                 bytecode::ObjectType::Hashtable => "hash-table",
+                                 bytecode::ObjectType::Alist => "alist",
                              });
     std::fs::write(&elisp_file, elisp_code.as_bytes())?;
 
@@ -68,25 +69,34 @@ fn test_huge_object() {
 #[test]
 fn test_completion_100k() {
     run_one_test(include_str!("./data/completion.json"), bytecode::ObjectType::Plist).unwrap();
+    run_one_test(include_str!("./data/completion.json"), bytecode::ObjectType::Alist).unwrap();
     run_one_test(include_str!("./data/completion.json"), bytecode::ObjectType::Hashtable).unwrap();
 }
 
 #[test]
 fn test_completion_100k_2() {
     run_one_test(include_str!("./data/completion2.json"), bytecode::ObjectType::Plist).unwrap();
+    run_one_test(include_str!("./data/completion2.json"), bytecode::ObjectType::Alist).unwrap();
+    run_one_test(include_str!("./data/completion2.json"), bytecode::ObjectType::Hashtable).unwrap();
 }
 
 #[test]
 fn test_completion_4k() {
     run_one_test(include_str!("./data/completion3.json"), bytecode::ObjectType::Plist).unwrap();
+    run_one_test(include_str!("./data/completion3.json"), bytecode::ObjectType::Alist).unwrap();
+    run_one_test(include_str!("./data/completion3.json"), bytecode::ObjectType::Hashtable).unwrap();
 }
 
 #[test]
 fn test_diagnostics_12k() {
     run_one_test(include_str!("./data/publishDiagnostics.json"), bytecode::ObjectType::Plist).unwrap();
+    run_one_test(include_str!("./data/publishDiagnostics.json"), bytecode::ObjectType::Alist).unwrap();
+    run_one_test(include_str!("./data/publishDiagnostics.json"), bytecode::ObjectType::Hashtable).unwrap();
 }
 
 #[test]
 fn test_diagnostics_12k_2() {
     run_one_test(include_str!("./data/publishDiagnostics2.json"), bytecode::ObjectType::Plist).unwrap();
+    run_one_test(include_str!("./data/publishDiagnostics2.json"), bytecode::ObjectType::Alist).unwrap();
+    run_one_test(include_str!("./data/publishDiagnostics2.json"), bytecode::ObjectType::Hashtable).unwrap();
 }

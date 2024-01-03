@@ -143,7 +143,7 @@ impl Op {
 pub enum ObjectType {
     Plist,
     Hashtable,
-    // TODO: Alist,
+    Alist,
 }
 
 pub struct BytecodeOptions {
@@ -216,16 +216,22 @@ impl BytecodeCompiler {
         }
     }
 
-    fn compile_value_map_plist(&mut self, map: &json::Map<String, json::Value>) {
-        let list_len = map.len() * 2;
+    fn compile_value_map_plist_or_alist(&mut self, map: &json::Map<String, json::Value>, alist: bool) {
+        let list_len = if alist { map.len() } else { map.len() * 2 };
         // see below
         if list_len < (1 << 16) && list_len >= (1 << 8) {
             self.compile_constant_op(LispObject::Symbol("list".into()));
         }
 
         for (key, value) in map {
-            self.compile_constant_op(LispObject::Keyword(key.clone()));
-            self.compile_value(value);
+            if alist {
+                self.compile_constant_op(LispObject::Symbol(key.clone()));
+                self.compile_value(value);
+                self.ops.push(Op::Cons);
+            } else {
+                self.compile_constant_op(LispObject::Keyword(key.clone()));
+                self.compile_value(value);
+            }
         }
 
         // four modes: 0. (empty) just nil 1. list op; 2. list call; 3. recursive cons
@@ -287,7 +293,8 @@ impl BytecodeCompiler {
             },
             &json::Value::Object(ref map) => {
                 match self.options.object_type {
-                    ObjectType::Plist => self.compile_value_map_plist(&map),
+                    ObjectType::Plist => self.compile_value_map_plist_or_alist(&map, false),
+                    ObjectType::Alist => self.compile_value_map_plist_or_alist(&map, true),
                     ObjectType::Hashtable => self.compile_value_map_hashtable(&map),
                 };
             },
