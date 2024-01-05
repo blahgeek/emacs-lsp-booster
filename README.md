@@ -23,7 +23,7 @@ This project provides an wrapper executable around lsp servers to work around ab
 
 - It converts json responses from server into **elisp bytecode** (in text representation) for Emacs to read.
     * e.g. `{"objs":[{"a":1},{"a":2}]}` would be converted to `#[0 "\301\302\300\303D\300\304D\"D\207" [:a :objs vector 1 2] 13]`
-    * This would improve the message parsing performance in Emacs by ~4x for large json objects
+    * This would improve the message parsing performance in Emacs by ~4x for large json objects, see benchmark result [here](https://github.com/blahgeek/emacs-lsp-booster/actions/runs/7416840025/job/20182439682#step:5:142)
     * Although Emacs still needs to parse the text representation and interpret it into elisp object, the performance gain mainly comes from:
         * Parsing (`read`ing) elisp object is apparently better optimized and simpler in Emacs
         * Using bytecode to construct objects, we can eliminate duplicated objects (e.g. the "a" json key in above example)
