@@ -41,8 +41,16 @@ Prerequisite:
 
 Steps:
 
-1. Build the target or download it from [release](https://github.com/blahgeek/emacs-lsp-booster/releases), put the executable `emacs-lsp-booster` in $PATH (e.g. `~/.local/bin`)
-2. Add the following code to your `init.el`:
+1. Download latest release from [release](https://github.com/blahgeek/emacs-lsp-booster/releases), put the executable `emacs-lsp-booster` in $PATH (e.g. `~/.local/bin`)
+   
+   or 
+
+   Clone this repo and build locally with `cargo build --target=aarch64-apple-darwin --verbose -r`. Note this command builds execuitable compatible with Apple silicon. Change `--target` as needed.
+
+   To install `cargo` and `rust` follow instructions [here](https://www.rust-lang.org/tools/install).
+
+
+3. Add the following code to your `init.el`:
 
 > NOTE: if your emacs does not have json support (aka, `(fboundp 'json-parse-buffer)` is nil),
 > replace `json-parse-buffer` with `json-read` in the first line!
