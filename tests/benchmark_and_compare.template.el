@@ -94,14 +94,14 @@
   (message "Benchmark json-parse-string 100 times: %s"
            (benchmark-run 100
              (json-parse-string json-str :object-type object-type :null-object nil :false-object nil)))
-  (message "Benchmark read-bytecode 100 times: %s"
-           (benchmark-run 100
-             (read bytecode-str)))
-  (message "Benchmark read-eval-bytecode 100 times: %s"
+  (message "Benchmark read & eval bytecode 100 times: %s"
            (benchmark-run 100
              (funcall (read bytecode-str))))
+  (message "(Just for reference) Benchmark read bytecode only (no eval) 100 times: %s"
+           (benchmark-run 100
+             (read bytecode-str)))
   (let ((lisp-str (prin1-to-string json-val)))
-    (message "Benchmark read-lisp-data 100 times: %s"
+    (message "(Just for reference) Benchmark read lisp data directly 100 times: %s"
              (benchmark-run 100
                (read lisp-str))))
 

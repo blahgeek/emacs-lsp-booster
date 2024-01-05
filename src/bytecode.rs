@@ -139,7 +139,7 @@ impl Op {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum ObjectType {
     Plist,
     Hashtable,

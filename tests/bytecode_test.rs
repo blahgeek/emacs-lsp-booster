@@ -48,55 +48,42 @@ fn run_one_test(json_str: &str, object_type: bytecode::ObjectType) -> Result<()>
 }
 
 #[test]
-fn test_huge_array() {
-    let value = json::Value::Array(
-        (0..100000).map(|x| json::Value::String(format!("{}", x)))
-            .collect()
-    );
-    run_one_test(&value.to_string(), bytecode::ObjectType::Plist).unwrap();
-}
+fn test_bytecode() {
+    for object_type in vec![bytecode::ObjectType::Plist,
+                            bytecode::ObjectType::Alist,
+                            bytecode::ObjectType::Hashtable] {
+        eprintln!("Testing completion.json (~100KB), object type = {:?}", object_type);
+        run_one_test(include_str!("./data/completion.json"), object_type).unwrap();
 
-#[test]
-fn test_huge_object() {
-    let value = json::Value::Object(
-        (0..100000).map(|x| (format!("x{}", x),
-                             json::Value::Number(x.into())))
-            .collect()
-    );
-    run_one_test(&value.to_string(), bytecode::ObjectType::Plist).unwrap();
-}
+        eprintln!("Testing completion2.json (~100KB), object type = {:?}", object_type);
+        run_one_test(include_str!("./data/completion2.json"), object_type).unwrap();
 
-#[test]
-fn test_completion_100k() {
-    run_one_test(include_str!("./data/completion.json"), bytecode::ObjectType::Plist).unwrap();
-    run_one_test(include_str!("./data/completion.json"), bytecode::ObjectType::Alist).unwrap();
-    run_one_test(include_str!("./data/completion.json"), bytecode::ObjectType::Hashtable).unwrap();
-}
+        eprintln!("Testing completion3.json (~4KB), object type = {:?}", object_type);
+        run_one_test(include_str!("./data/completion3.json"), object_type).unwrap();
 
-#[test]
-fn test_completion_100k_2() {
-    run_one_test(include_str!("./data/completion2.json"), bytecode::ObjectType::Plist).unwrap();
-    run_one_test(include_str!("./data/completion2.json"), bytecode::ObjectType::Alist).unwrap();
-    run_one_test(include_str!("./data/completion2.json"), bytecode::ObjectType::Hashtable).unwrap();
-}
+        eprintln!("Testing publishDiagnostics.json (~12KB), object type = {:?}", object_type);
+        run_one_test(include_str!("./data/publishDiagnostics.json"), object_type).unwrap();
 
-#[test]
-fn test_completion_4k() {
-    run_one_test(include_str!("./data/completion3.json"), bytecode::ObjectType::Plist).unwrap();
-    run_one_test(include_str!("./data/completion3.json"), bytecode::ObjectType::Alist).unwrap();
-    run_one_test(include_str!("./data/completion3.json"), bytecode::ObjectType::Hashtable).unwrap();
-}
+        eprintln!("Testing publishDiagnostics2.json (~12KB), object type = {:?}", object_type);
+        run_one_test(include_str!("./data/publishDiagnostics2.json"), object_type).unwrap();
+    }
 
-#[test]
-fn test_diagnostics_12k() {
-    run_one_test(include_str!("./data/publishDiagnostics.json"), bytecode::ObjectType::Plist).unwrap();
-    run_one_test(include_str!("./data/publishDiagnostics.json"), bytecode::ObjectType::Alist).unwrap();
-    run_one_test(include_str!("./data/publishDiagnostics.json"), bytecode::ObjectType::Hashtable).unwrap();
-}
+    {
+        eprintln!("Testing huge array (100000 elements)");
+        let value = json::Value::Array(
+            (0..100000).map(|x| json::Value::String(format!("{}", x)))
+                .collect()
+        );
+        run_one_test(&value.to_string(), bytecode::ObjectType::Plist).unwrap();
+    }
 
-#[test]
-fn test_diagnostics_12k_2() {
-    run_one_test(include_str!("./data/publishDiagnostics2.json"), bytecode::ObjectType::Plist).unwrap();
-    run_one_test(include_str!("./data/publishDiagnostics2.json"), bytecode::ObjectType::Alist).unwrap();
-    run_one_test(include_str!("./data/publishDiagnostics2.json"), bytecode::ObjectType::Hashtable).unwrap();
+    {
+        eprintln!("Testing huge map (100000 elements)");
+        let value = json::Value::Object(
+            (0..100000).map(|x| (format!("x{}", x),
+                                 json::Value::Number(x.into())))
+                .collect()
+        );
+        run_one_test(&value.to_string(), bytecode::ObjectType::Plist).unwrap();
+    }
 }
