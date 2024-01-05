@@ -47,6 +47,8 @@ Steps:
 > NOTE: if your emacs does not have json support (aka, `(fboundp 'json-parse-buffer)` is nil),
 > replace `json-parse-buffer` with `json-read` in the first line!
 
+> **For eglot users**: see https://github.com/blahgeek/emacs-lsp-booster/issues/1
+
 ```elisp
 (define-advice json-parse-buffer (:around (old-fn &rest args) lsp-booster-parse-bytecode)
   "Try to parse bytecode instead of json."
