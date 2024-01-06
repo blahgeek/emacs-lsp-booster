@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::str::FromStr;
 
 use anyhow::{Result, bail};
 use serde_json as json;
@@ -15,6 +16,22 @@ pub enum LispObject {
     Nil,
     T,
     Vector(Vec<LispObject>),
+}
+
+impl FromStr for LispObject {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        if s == "nil" {
+            Ok(Self::Nil)
+        } else if s == "t" {
+            Ok(Self::T)
+        } else if s.starts_with(":") {
+            Ok(Self::Symbol(s[1..].to_string()))
+        } else {
+            bail!("Supported LispObject: {}", s)
+        }
+    }
 }
 
 impl LispObject {
@@ -139,26 +156,27 @@ impl Op {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, clap::ValueEnum)]
 pub enum ObjectType {
     Plist,
     Hashtable,
     Alist,
 }
 
+#[derive(Clone)]
 pub struct BytecodeOptions {
     pub object_type: ObjectType,
     // TODO: array_type
-    pub null_object: LispObject,
-    pub false_object: LispObject,
+    pub null_value: LispObject,
+    pub false_value: LispObject,
 }
 
 impl Default for BytecodeOptions {
     fn default() -> Self {
         Self {
             object_type: ObjectType::Plist,
-            null_object: LispObject::Nil,
-            false_object: LispObject::Nil,
+            null_value: LispObject::Nil,
+            false_value: LispObject::Nil,
         }
     }
 }
@@ -270,10 +288,10 @@ impl BytecodeCompiler {
     fn compile_value(&mut self, value: &json::Value) {
         match value {
             &json::Value::Null => {
-                self.compile_constant_op(self.options.null_object.clone());
+                self.compile_constant_op(self.options.null_value.clone());
             },
             &json::Value::Bool(false) => {
-                self.compile_constant_op(self.options.false_object.clone());
+                self.compile_constant_op(self.options.false_value.clone());
             },
             &json::Value::Bool(true) => {
                 self.compile_constant_op(LispObject::T);

@@ -4,7 +4,7 @@ use log::{warn, info};
 use anyhow::Result;
 use serde_json as json;
 
-use crate::{rpcio, bytecode};
+use crate::{rpcio, bytecode::{self, BytecodeOptions}};
 use crate::lsp_message::{LspRequest, LspResponse, LspResponseError};
 
 fn process_channel_to_writer(channel_sub: mpsc::Receiver<String>,
@@ -63,7 +63,8 @@ fn process_client_reader(reader: impl std::io::Read,
 }
 
 fn process_server_reader(reader: impl std::io::Read,
-                         channel_pub: mpsc::Sender<String>) -> Result<()> {
+                         channel_pub: mpsc::Sender<String>,
+                         bytecode_options: BytecodeOptions) -> Result<()> {
     let mut bufreader = std::io::BufReader::new(reader);
     loop {
         let msg = rpcio::rpc_read(&mut bufreader)?;
@@ -71,7 +72,7 @@ fn process_server_reader(reader: impl std::io::Read,
             break
         }
         let json_val = json::from_str(&msg)?;
-        match bytecode::generate_bytecode_repl(&json_val, bytecode::BytecodeOptions::default()) {
+        match bytecode::generate_bytecode_repl(&json_val, bytecode_options.clone()) {
             Ok(bytecode_str) => {
                 channel_pub.send(bytecode_str)?;
             },
@@ -84,9 +85,14 @@ fn process_server_reader(reader: impl std::io::Read,
     Ok(())
 }
 
+pub struct AppOptions {
+    pub bytecode_options: bytecode::BytecodeOptions,
+}
+
 pub fn run_app_forever(client_reader: impl std::io::Read + Send + 'static,
                        client_writer: impl std::io::Write + Send + 'static,
-                       mut server_cmd: std::process::Command) -> Result<std::process::ExitStatus> {
+                       mut server_cmd: std::process::Command,
+                       options: AppOptions) -> Result<std::process::ExitStatus> {
     info!("Running server {:?}", server_cmd);
     let mut proc = server_cmd
         .stdin(std::process::Stdio::piped())
@@ -117,7 +123,7 @@ pub fn run_app_forever(client_reader: impl std::io::Read + Send + 'static,
         let proc_stdout = proc.stdout.take().unwrap();
         std::thread::spawn(move || {
             info!("Started server->client read thread");
-            process_server_reader(proc_stdout, s2c_channel_pub).unwrap();
+            process_server_reader(proc_stdout, s2c_channel_pub, options.bytecode_options).unwrap();
             info!("Finished server->client read thread");
         });
     }
