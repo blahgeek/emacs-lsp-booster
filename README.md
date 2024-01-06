@@ -1,5 +1,8 @@
 # Emacs LSP performance booster
 
+![Build and test status](https://github.com/blahgeek/emacs-lsp-booster/actions/workflows/build-test.yml/badge.svg)
+![Release status](https://github.com/blahgeek/emacs-lsp-booster/actions/workflows/release.yml/badge.svg)
+
 Improve performance of [lsp-mode](https://github.com/emacs-lsp/lsp-mode) or [eglot](https://github.com/joaotavora/eglot) using a wrapper executable.
 
 ## Background & Prior work
