@@ -50,7 +50,7 @@ For linux users, you may download the prebuilt binary from [release](https://git
 
 Or alternatively, you may build the target locally:
 
-1. Setup [Rust toolchain](https://rustup.rs/)
+1. Setup [Rust toolchain](https://www.rust-lang.org/tools/install)
 2. Run `cargo build --release`
 3. Find the built binary in `target/release/emacs-lsp-booster`
 
