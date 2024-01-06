@@ -23,7 +23,7 @@ Also, frankly I doubt that this would be well-maintained in the future since it 
 
 ## How this project works
 
-This project provides a wrapper-executable around lsp server programs, to work around above-mentioned issues:
+This project provides a wrapper-executable around lsp server programs, to work around the above-mentioned issues:
 
 - It converts json responses from the server into **elisp bytecode** (in text representation) for Emacs to read.
     * e.g. `{"objs":[{"a":1},{"a":2}]}` would be converted to `#[0 "\301\302\300\303D\300\304D\"D\207" [:a :objs vector 1 2] 13]`
