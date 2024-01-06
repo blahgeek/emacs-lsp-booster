@@ -13,6 +13,8 @@ lazy_static = "1.4"
 smallvec = "1.11"
 env_logger = "0.10"
 log = "0.4.20"
+clap = { version = "4.4", features = ["derive", "cargo"] }
+clap-verbosity-flag = "2.1.1"
 
 [[example]]
 name = "native-json-parser"
