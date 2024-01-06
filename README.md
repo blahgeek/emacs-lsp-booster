@@ -18,7 +18,7 @@ the are several performance issues related to lsp-mode (mostly the same for eglo
 
 @yyoncho tried to solve these issues by implementing a [native async non-blocking jsonrpc](https://github.com/emacs-lsp/emacs) fork of emacs.
 The result is very good regarding performance. However, it requires modifications in the Emacs source code and it seems unlikely that those changes could be merged upstream.
-Also, it could prove difficult to maintain, since it also requires separate code path in lsp-mode (I myself encountered some [issues](https://github.com/emacs-lsp/emacs/issues/12)).
+Also, it could prove difficult to maintain, since it also requires a separate code path in lsp-mode (I myself encountered some [issues](https://github.com/emacs-lsp/emacs/issues/12)).
 
 ## How this project works
 
@@ -32,7 +32,7 @@ This project provides a wrapper-executable around lsp server programs, to work a
         * By using bytecode to construct objects, we can eliminate duplicated objects (e.g. the "a" json key in above example)
 - It separates reading and writing into different threads and keeps pending messages in internal buffers within each thread, to avoid blocking on IO.  This solves issues (2) and (3) mentioned above.
 
-Overall, this _lsp server wrapper_ strategy achieves similar result as the native async non-blocking jsonrpc approach without requiring modifications in Emacs source code.  
+Overall, this _lsp server wrapper_ strategy achieves similar result as the native async non-blocking jsonrpc approach without requiring modifications in Emacs source code.
 
 > [!IMPORTANT]  
 > At present only local lsp server programs which communicate by standard input/output can be wrapped, not servers communicating over network ports (local or remote).
