@@ -3,6 +3,10 @@ name: Build and test
 on:
   push:
     branches: [ "master" ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'Cargo.*'
   pull_request:
     branches: [ "master" ]
 
