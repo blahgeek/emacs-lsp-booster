@@ -92,6 +92,6 @@ fn test_parse_args() {
     assert_eq!(cli.verbose.log_level_filter(), log::LevelFilter::Debug);
     assert_eq!(cli.server_cmd, vec!["server_cmd", "arg1"]);
     assert_eq!(cli.json_object_type, bytecode::ObjectType::Hashtable);
-    assert_eq!(cli.json_null_value, bytecode::LispObject::Symbol("null".into()));
-    assert_eq!(cli.json_false_value, bytecode::LispObject::Symbol("json-false".into()));
+    assert_eq!(cli.json_null_value, bytecode::LispObject::Keyword("null".into()));
+    assert_eq!(cli.json_false_value, bytecode::LispObject::Keyword("json-false".into()));
 }

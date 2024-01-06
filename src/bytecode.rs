@@ -27,7 +27,7 @@ impl FromStr for LispObject {
         } else if s == "t" {
             Ok(Self::T)
         } else if s.starts_with(":") {
-            Ok(Self::Symbol(s[1..].to_string()))
+            Ok(Self::Keyword(s[1..].to_string()))
         } else {
             bail!("Supported LispObject: {}", s)
         }
