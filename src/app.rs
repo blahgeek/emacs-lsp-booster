@@ -1,6 +1,6 @@
 use std::sync::{mpsc, Arc, atomic::{AtomicI32, self}};
 
-use log::{warn, info};
+use log::{warn, info, debug};
 use anyhow::Result;
 use serde_json as json;
 
@@ -64,29 +64,28 @@ fn process_client_reader(reader: impl std::io::Read,
 
 fn process_server_reader(reader: impl std::io::Read,
                          channel_pub: mpsc::Sender<String>,
-                         bytecode_options: BytecodeOptions) -> Result<()> {
+                         bytecode_options: Option<BytecodeOptions>) -> Result<()> {
     let mut bufreader = std::io::BufReader::new(reader);
     loop {
         let msg = rpcio::rpc_read(&mut bufreader)?;
         if msg.is_empty() {
             break
         }
-        let json_val = json::from_str(&msg)?;
-        match bytecode::generate_bytecode_repl(&json_val, bytecode_options.clone()) {
-            Ok(bytecode_str) => {
+        if let Some(ref bytecode_options) = bytecode_options {
+            let json_val = json::from_str(&msg)?;
+            if let Ok(bytecode_str) = bytecode::generate_bytecode_repl(&json_val, bytecode_options.clone()) {
                 channel_pub.send(bytecode_str)?;
-            },
-            Err(e) => {
-                warn!("Failed to generate bytecode: {}; fallback to original json", e);
-                channel_pub.send(msg)?;
-            },
+                continue
+            }
         }
+        channel_pub.send(msg)?;
     }
     Ok(())
 }
 
 pub struct AppOptions {
-    pub bytecode_options: bytecode::BytecodeOptions,
+    // if bytecode_options is None, then don't generate bytecode!
+    pub bytecode_options: Option<bytecode::BytecodeOptions>,
 }
 
 pub fn run_app_forever(client_reader: impl std::io::Read + Send + 'static,
@@ -94,6 +93,12 @@ pub fn run_app_forever(client_reader: impl std::io::Read + Send + 'static,
                        mut server_cmd: std::process::Command,
                        options: AppOptions) -> Result<std::process::ExitStatus> {
     info!("Running server {:?}", server_cmd);
+    if let Some(ref bytecode_options) = options.bytecode_options {
+        info!("Will convert server json to bytecode! bytecode options: {:?}", bytecode_options);
+    } else {
+        info!("Bytecode disabled! Will forward server json as-is.")
+    }
+
     let mut proc = server_cmd
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
@@ -108,30 +113,30 @@ pub fn run_app_forever(client_reader: impl std::io::Read + Send + 'static,
         let c2s_channel_counter = c2s_channel_counter.clone();
         let proc_stdin = proc.stdin.take().unwrap();
         std::thread::spawn(move || {
-            info!("Started client->server write thread");
+            debug!("Started client->server write thread");
             process_channel_to_writer(c2s_channel_sub, Some(c2s_channel_counter), proc_stdin).unwrap();
-            info!("Finished client->server write thread");
+            debug!("Finished client->server write thread");
         });
     }
     std::thread::spawn(move || {
-        info!("Started server->client write thread");
+        debug!("Started server->client write thread");
         process_channel_to_writer(s2c_channel_sub, None, client_writer).unwrap();
-        info!("Finished server->client write thread");
+        debug!("Finished server->client write thread");
     });
     {
         let s2c_channel_pub = s2c_channel_pub.clone();
         let proc_stdout = proc.stdout.take().unwrap();
         std::thread::spawn(move || {
-            info!("Started server->client read thread");
+            debug!("Started server->client read thread");
             process_server_reader(proc_stdout, s2c_channel_pub, options.bytecode_options).unwrap();
-            info!("Finished server->client read thread");
+            debug!("Finished server->client read thread");
         });
     }
     std::thread::spawn(move || {
-        info!("Started client->server read thread");
+        debug!("Started client->server read thread");
         process_client_reader(
             client_reader, c2s_channel_pub, c2s_channel_counter, s2c_channel_pub).unwrap();
-        info!("Finished client->server read thread");
+        debug!("Finished client->server read thread");
     });
 
     Ok(proc.wait()?)

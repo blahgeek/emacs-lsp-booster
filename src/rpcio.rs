@@ -1,6 +1,6 @@
 use std::{str::FromStr, io::Write};
 
-use log::debug;
+use log::trace;
 use anyhow::{Result, bail};
 
 // return empty string on EOF
@@ -24,7 +24,7 @@ pub fn rpc_read(reader: &mut impl std::io::BufRead) -> Result<String> {
         if splitted.len() != 2 {
             bail!("Invalid header format");
         }
-        debug!("Header: {:?}", splitted);
+        trace!("Header: {:?}", splitted);
         if splitted[0] == "Content-Length" {
             content_len = Some(usize::from_str(splitted[1])?);
         }

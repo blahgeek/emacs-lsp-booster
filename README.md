@@ -107,3 +107,7 @@ Please see https://github.com/blahgeek/emacs-lsp-booster/issues/1 . Huge thanks 
 
 1. Check that `emacs-lsp-booster` process is running
 2. Check the stderr buffer (e.g. for lsp-mode, `*pyright::stderr*` buffer), it should contain `emacs_lsp_booster` related log.
+
+### Advanced usage
+
+Run `emacs-lsp-booster --help` for more options.

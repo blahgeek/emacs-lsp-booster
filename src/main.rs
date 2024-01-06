@@ -10,10 +10,14 @@ use emacs_lsp_booster::bytecode;
           arg_required_else_help = true, after_help = "For backward compatibility, `emacs-lsp-booster <SERVER_CMD>...` (without any options) is also supported" )]
 struct Cli {
     #[command(flatten)]
-    verbose: clap_verbosity_flag::Verbosity,
+    verbose: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
 
     #[arg(last = true)]
     server_cmd: Vec<String>,
+
+    #[arg(short = 'n', long,
+          help = "Disable bytecode generation. Simply forward server json as-is. Useful for debugging or benchmarking.")]
+    disable_bytecode: bool,
 
     #[arg(long, default_value = "plist",
           help = "Lisp type used to represent a JSON object. Plist is the most performant one.\nMust match what lsp client expects.\n")]
@@ -61,11 +65,12 @@ fn main() -> Result<()> {
     cmd.args(&cli.server_cmd[1..]);
 
     let exit_status = app::run_app_forever(std::io::stdin(), std::io::stdout(), cmd, app::AppOptions {
-        bytecode_options: bytecode::BytecodeOptions {
-            object_type: cli.json_object_type,
-            null_value: cli.json_null_value,
-            false_value: cli.json_false_value,
-        },
+        bytecode_options: if !cli.disable_bytecode {
+            Some(bytecode::BytecodeOptions {
+                object_type: cli.json_object_type,
+                null_value: cli.json_null_value,
+                false_value: cli.json_false_value,
+            }) } else { None },
     })?;
     std::process::exit(exit_status.code().unwrap_or(1))
 }
@@ -74,6 +79,7 @@ fn main() -> Result<()> {
 fn test_parse_args() {
     let cli = parse_args(vec!["emacs-lsp-booster", "server_cmd", "arg1"]);
     assert_eq!(cli.server_cmd, vec!["server_cmd", "arg1"]);
+    assert_eq!(cli.verbose.log_level_filter(), log::LevelFilter::Info);
 
     let cli = parse_args(vec!["emacs-lsp-booster", "--", "server_cmd", "arg1"]);
     assert_eq!(cli.server_cmd, vec!["server_cmd", "arg1"]);
@@ -83,7 +89,7 @@ fn test_parse_args() {
                               "--json-null-value", ":null",
                               "--json-false-value", ":json-false",
                               "--", "server_cmd", "arg1"]);
-    assert_eq!(cli.verbose.log_level_filter(), log::LevelFilter::Warn);
+    assert_eq!(cli.verbose.log_level_filter(), log::LevelFilter::Debug);
     assert_eq!(cli.server_cmd, vec!["server_cmd", "arg1"]);
     assert_eq!(cli.json_object_type, bytecode::ObjectType::Hashtable);
     assert_eq!(cli.json_null_value, bytecode::LispObject::Symbol("null".into()));

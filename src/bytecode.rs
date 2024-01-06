@@ -163,7 +163,7 @@ pub enum ObjectType {
     Alist,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BytecodeOptions {
     pub object_type: ObjectType,
     // TODO: array_type
