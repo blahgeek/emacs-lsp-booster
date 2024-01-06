@@ -73,11 +73,19 @@ fn process_server_reader(reader: impl std::io::Read,
         }
         if let Some(ref bytecode_options) = bytecode_options {
             let json_val = json::from_str(&msg)?;
-            if let Ok(bytecode_str) = bytecode::generate_bytecode_repl(&json_val, bytecode_options.clone()) {
-                channel_pub.send(bytecode_str)?;
-                continue
+            match bytecode::generate_bytecode_repl(&json_val, bytecode_options.clone()) {
+                Ok(bytecode_str) => {
+                    debug!("server->client: json {} bytes; converted to bytecode, {} bytes",
+                           msg.len(), bytecode_str.len());
+                    channel_pub.send(bytecode_str)?;
+                    continue
+                },
+                Err(err) => {
+                    warn!("Failed to convert json to bytecode: {}", err);
+                },
             }
         }
+        debug!("server->client: json {} bytes; forward as-is", msg.len());
         channel_pub.send(msg)?;
     }
     Ok(())
