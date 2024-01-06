@@ -13,36 +13,37 @@ According to [yyoncho](https://www.reddit.com/r/emacs/comments/ymrkyn/comment/iv
 the are several performance issues related to lsp-mode (mostly the same for eglot):
 
 1. Json parsing in Emacs is slow
-2. The server may block on sending data to emacs when the buffer is full, because Emacs may consume the data too slo
-3. Similarly, Emacs may block on sending data to the server (hence block Emacs UI) when the buffer is full, because the server may be busy
+2. The server may block on sending data to emacs when the buffer is full, because Emacs is consuming the data too slowly
+3. Similarly, Emacs may block while attempting to send data to the server (hence blocking the Emacs UI), because the server may be busy
 
-@yyoncho tried to solve these issues by implementing [native async non-blocking jsonrpc](https://github.com/emacs-lsp/emacs).
-The result is very good regarding performance. However, it requires modifications in the Emacs source code and it seems unlikely that those changes would be merged into upstream.
-Also, frankly I doubt that this would be well-maintained in the future since it also requires seperated code path in lsp-mode (I myself encountered some [issues](https://github.com/emacs-lsp/emacs/issues/12)).
-
+@yyoncho tried to solve these issues by implementing a [native async non-blocking jsonrpc](https://github.com/emacs-lsp/emacs) fork of emacs.
+The result is very good regarding performance. However, it requires modifications in the Emacs source code and it seems unlikely that those changes could be merged upstream.
+Also, it could prove difficult to maintain, since it also requires separate code path in lsp-mode (I myself encountered some [issues](https://github.com/emacs-lsp/emacs/issues/12)).
 
 ## How this project works
 
 This project provides a wrapper-executable around lsp server programs, to work around the above-mentioned issues:
 
-- It converts json responses from the server into **elisp bytecode** (in text representation) for Emacs to read.
+- It converts json messages from the server at high speed directly into **elisp bytecode** (in text representation) for Emacs to read.
     * e.g. `{"objs":[{"a":1},{"a":2}]}` would be converted to `#[0 "\301\302\300\303D\300\304D\"D\207" [:a :objs vector 1 2] 13]`
-    * This improves the message parsing performance in Emacs by ~4x for large json objects, see benchmark result [here](https://github.com/blahgeek/emacs-lsp-booster/actions/runs/7416840025/job/20182439682#step:5:142)
+    * This improves the message parsing performance in Emacs by ~4x for large json objects; see benchmark result [here](https://github.com/blahgeek/emacs-lsp-booster/actions/runs/7416840025/job/20182439682#step:5:142)
     * Although Emacs still needs to parse the text representation and interpret it into elisp objects, the performance gain mainly comes from the following:
         * Parsing (`read`ing) elisp object is apparently better optimized and simpler in Emacs
-        * Using bytecode to construct objects, we can eliminate duplicated objects (e.g. the "a" json key in above example)
-- It separates reading and writing into different threads and keeps pending messages in internal buffers, to avoid blocking on IO, which solves the above-mentioned issues (2) and (3).
+        * By using bytecode to construct objects, we can eliminate duplicated objects (e.g. the "a" json key in above example)
+- It separates reading and writing into different threads and keeps pending messages in internal buffers within each thread, to avoid blocking on IO.  This solves issues (2) and (3) mentioned above.
 
-Overall, this achieves similar result as the native async non-blocking jsonrpc approach without requiring modifications in Emacs source code.
+Overall, this _lsp server wrapper_ strategy achieves similar result as the native async non-blocking jsonrpc approach without requiring modifications in Emacs source code.  
 
+> [!IMPORTANT]  
+> At present only local lsp server programs which communicate by standard input/output can be wrapped, not servers communicating over network ports (local or remote).
 
 ## How to use
 
 Generally, what you need to do is:
 
 1. Wrap your lsp server command with this `emacs-lsp-booster` executable.
-   For example, if the original lsp server command is `pyright-langserver --stdio`, configure lsp-mode or eglot to run `emacs-lsp-booster pyright-langserver --stdio` instead.
-2. Advise/update the json parsing function in lsp-mode or eglot to try to parse the input as bytecode prior to parsing it as json.
+   For example, if the original lsp server command is `pyright-langserver --stdio`, configure lsp-mode or eglot to run `emacs-lsp-booster [flags] pyright-langserver --stdio` instead.
+2. Advise or update the json parsing function in `lsp-mode` or `eglot` to parse any bytecode input seen, prior to parsing it as json.
 
 See more detailed configuration steps below.
 
@@ -51,7 +52,7 @@ See more detailed configuration steps below.
 For linux users, you may download the prebuilt binary from [release](https://github.com/blahgeek/emacs-lsp-booster/releases).
 *(The macOS binary in the release page lacks proper code signing for now.)*
 
-Or alternatively, you may build the target locally:
+Alternatively, you may build the target locally:
 
 1. Setup [Rust toolchain](https://www.rust-lang.org/tools/install)
 2. Run `cargo build --release`
@@ -61,7 +62,8 @@ Then, put the `emacs-lsp-booster` binary in your $PATH (e.g. `~/.local/bin`).
 
 ### Configure `lsp-mode`
 
-(Make sure NOT to use the [native-jsonrpc custom version](https://github.com/emacs-lsp/emacs))
+> [!NOTE]  
+> Make sure NOT to use the [native-jsonrpc custom version](https://github.com/emacs-lsp/emacs) of Emacs
 
 1. **Use [plist for deserialization](https://emacs-lsp.github.io/lsp-mode/page/performance/#use-plists-for-deserialization) for lsp-mode**
 3. Add the following code to your `init.el`:
@@ -101,7 +103,8 @@ Done! Now try to use lsp-mode as usual.
 
 ### Configure `eglot`
 
-Please see https://github.com/blahgeek/emacs-lsp-booster/issues/1 for information on configuring `eglot`. Huge thanks to @jdtsmith
+Please see https://github.com/blahgeek/emacs-lsp-booster/issues/1 for information on configuring `eglot`. 
+Huge thanks to @jdtsmith
 
 ### How to verify it's working
 
