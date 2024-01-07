@@ -10,6 +10,7 @@ use smallvec::smallvec;
 pub enum LispObject {
     Symbol(String),
     Keyword(String),
+    UnibyteStr(Vec<u8>),
     Str(String),
     Int(i64),
     Float(String),  // use string for Eq and Ord
@@ -41,23 +42,43 @@ impl LispObject {
             LispObject::Keyword(s) => format!(":{}", s),
             LispObject::Str(s) => {
                 let mut result = String::new();
+                result.reserve(s.len() * 2 + 2);
                 result.push('"');
-                let mut last_is_escape = false;
                 for c in s.chars() {
-                    if c == '"' || c == '\\' {
+                    if c == '\"' || c == '\\' {
                         result.push('\\');
                         result.push(c);
-                        last_is_escape = false;
-                    } else if (c as u32) < 32 || ((c as u32) > 126 && (c as u32) < 256) {
-                        result += &format!("\\{:o}", c as u32);
-                        last_is_escape = true;
+                    } else if (c as u32) < 32 || (c as u32) == 127 {  // not printable
+                        result += &format!("\\{:03o}", c as u32);
                     } else {
-                        // https://www.gnu.org/software/emacs/manual/html_node/elisp/Non_002dASCII-in-Strings.html
-                        if last_is_escape && ('0'..='8').contains(&c) {
-                            result += "\\ ";
-                        }
                         result.push(c);
-                        last_is_escape = false;
+                    }
+                }
+                result.push('"');
+                result
+            },
+            LispObject::UnibyteStr(vec) => {
+                let mut result = String::new();
+                result.reserve(vec.len() * 4 + 2);
+                result.push('"');
+                for c in vec {
+                    match *c {
+                        7 => result += "\\a",
+                        8 => result += "\\b",
+                        9 => result += "\\t",
+                        10 => result += "\\n",
+                        11 => result += "\\v",
+                        12 => result += "\\f",
+                        13 => result += "\\r",
+                        127 => result += "\\d",
+                        27 => result += "\\e",
+                        0..=26 => {  // \^@ \^A \^B ... \^Z
+                            result += &format!("\\^{}", (*c as u32 + 64) as u8 as char);
+                        },
+                        27..=31 | 128..=255 | 34 | 92 => {  // oct, for unprintable and '"' and '\\'
+                            result += &format!("\\{:03o}", *c as u32);
+                        },
+                        _ => result.push(*c as char),  // printable
                     }
                 }
                 result.push('"');
@@ -386,7 +407,7 @@ impl BytecodeCompiler {
     fn into_repl(self) -> Result<String> {
         let (code, constants, max_stack_size) = self.into_bytecode()?;
         Ok(format!("#[0 {} {} {}]",
-                   LispObject::Str(code.into_iter().map(|x| x as char).collect()).to_repl(),
+                   LispObject::UnibyteStr(code).to_repl(),
                    LispObject::Vector(constants).to_repl(),
                    max_stack_size))
     }
@@ -400,4 +421,14 @@ pub fn generate_bytecode_repl(value: &json::Value, options: BytecodeOptions) -> 
     };
     compiler.compile(value);
     compiler.into_repl()
+}
+
+
+#[test]
+fn test_string_repl() {
+    assert_eq!(LispObject::UnibyteStr("\x00".into()).to_repl(), r#""\^@""#);
+    assert_eq!(LispObject::UnibyteStr("\x1a".into()).to_repl(), r#""\^Z""#);
+    assert_eq!(LispObject::UnibyteStr("\x20".into()).to_repl(), r#"" ""#);
+    assert_eq!(LispObject::UnibyteStr("\x7f".into()).to_repl(), r#""\d""#);
+    assert_eq!(LispObject::UnibyteStr(vec![0xff]).to_repl(), r#""\377""#);
 }

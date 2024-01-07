@@ -49,6 +49,9 @@ fn run_one_test(json_str: &str, object_type: bytecode::ObjectType) -> Result<()>
 
 #[test]
 fn test_bytecode() {
+    // unicode test
+    run_one_test(r#"{"a":"ÀÁÂÃÄÅÆÇÈÉÊËÌ abcd \n 你好世界"}"#, bytecode::ObjectType::Plist).unwrap();
+
     for object_type in vec![bytecode::ObjectType::Plist,
                             bytecode::ObjectType::Alist,
                             bytecode::ObjectType::Hashtable] {
