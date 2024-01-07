@@ -84,6 +84,7 @@ const CV_NORMAL_SLOT_COUNT: u32 = (1 << 16) - CV_TWO_LEVEL_VECTOR_SIZE * 2;
 const CV_TWO_LEVEL_IDX_BEGIN: u32 = CV_NORMAL_SLOT_COUNT;
 const CV_TWO_LEVEL_DATA_BEGIN: u32 = CV_NORMAL_SLOT_COUNT + CV_TWO_LEVEL_VECTOR_SIZE;
 
+#[allow(dead_code)]
 enum Op {
     PushConstant(u32),  // support more than u16, will expand to multiple ops
     Call(u16),
@@ -205,32 +206,32 @@ impl BytecodeCompiler {
     }
 
     fn compile_value_array(&mut self, arr: &[json::Value]) {
-        if arr.len() < (1 << 16) {
-            // use "vector" call
+        if arr.is_empty() {
             self.compile_constant_op(LispObject::Symbol("vector".into()));
-            for value in arr {
+            self.ops.push(Op::Call(0));
+            return;
+        }
+
+        let chunks = arr.chunks((1 << 16) - 1);
+        let chunks_len = chunks.len();
+        assert!(chunks_len < (1 << 16));
+
+        if chunks_len > 1 {
+            // prepare a "vconcat" function, to concat multiple vectors
+            self.compile_constant_op(LispObject::Symbol("vconcat".into()));
+        }
+
+        for chunk in chunks {
+            self.compile_constant_op(LispObject::Symbol("vector".into()));
+            for value in chunk {
                 self.compile_value(value);
             }
-            self.ops.push(Op::Call(arr.len() as u16));
-        } else {
-            // fallback to make-vector & aset
-            self.compile_constant_op(LispObject::Symbol("make-vector".into()));
-            self.compile_constant_op(LispObject::Int(arr.len() as i64));
-            self.compile_constant_op(LispObject::Nil);
-            self.ops.push(Op::Call(2));
+            self.ops.push(Op::Call(chunk.len() as u16));
+        }
 
-            self.compile_constant_op(LispObject::Int(0)); // index for aset
-
-            for value in arr {
-                self.ops.push(Op::StackRef(1));  // the vector
-                self.ops.push(Op::StackRef(1));  // the index
-                self.compile_value(value);
-                self.ops.push(Op::ASet);
-                self.ops.push(Op::Discard);  // discard aset result
-                self.ops.push(Op::Add1);
-            }
-            self.ops.push(Op::Discard);   // discard index
-            // the vector remains
+        if chunks_len > 1 {
+            // call vconcat
+            self.ops.push(Op::Call(chunks_len as u16));
         }
     }
 
