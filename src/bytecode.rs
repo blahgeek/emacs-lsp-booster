@@ -76,10 +76,11 @@ impl LispObject {
                         13 => result += "\\r",
                         127 => result += "\\d",
                         27 => result += "\\e",
-                        0..=26 => {  // \^@ \^A \^B ... \^Z
+                        // NOTE: do not use 0..=7 in this branch, because it takes one more byte than the next branch
+                        8..=26 => {  // \^@ \^A \^B ... \^Z
                             result += &format!("\\^{}", (*c as u32 + 64) as u8 as char);
                         },
-                        27..=31 | 128..=255 | 34 | 92 => {  // oct, for unprintable and '"' and '\\'
+                        0..=7 | 27..=31 | 128..=255 | 34 | 92 => {  // oct, for unprintable and '"' and '\\'
                             let oct_s = format!("\\{:o}", *c as u32);
                             if oct_s.len() < 4 {
                                 oct_escape_not_full = true;
@@ -441,7 +442,7 @@ pub fn generate_bytecode_repl(value: &json::Value, options: BytecodeOptions) -> 
 
 #[test]
 fn test_string_repl() {
-    assert_eq!(LispObject::UnibyteStr("\x00".into()).to_repl(), r#""\^@""#);
+    assert_eq!(LispObject::UnibyteStr("\x00".into()).to_repl(), r#""\0""#);
     assert_eq!(LispObject::UnibyteStr("\x1a".into()).to_repl(), r#""\^Z""#);
     assert_eq!(LispObject::UnibyteStr("\x20".into()).to_repl(), r#"" ""#);
     assert_eq!(LispObject::UnibyteStr("\x7f".into()).to_repl(), r#""\d""#);
