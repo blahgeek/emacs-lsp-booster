@@ -63,7 +63,9 @@ impl LispObject {
                 let mut result = String::new();
                 result.reserve(vec.len() * 4 + 2);
                 result.push('"');
+                let mut last_oct_escape_not_full = false;
                 for c in vec {
+                    let mut oct_escape_not_full = false;
                     match *c {
                         7 => result += "\\a",
                         8 => result += "\\b",
@@ -78,10 +80,21 @@ impl LispObject {
                             result += &format!("\\^{}", (*c as u32 + 64) as u8 as char);
                         },
                         27..=31 | 128..=255 | 34 | 92 => {  // oct, for unprintable and '"' and '\\'
-                            result += &format!("\\{:03o}", *c as u32);
+                            let oct_s = format!("\\{:o}", *c as u32);
+                            if oct_s.len() < 4 {
+                                oct_escape_not_full = true;
+                            }
+                            result += &oct_s;
                         },
-                        _ => result.push(*c as char),  // printable
+                        _ => {  // printable
+                            // https://www.gnu.org/software/emacs/manual/html_node/elisp/Non_002dASCII-in-St
+                            if last_oct_escape_not_full && ('0'..='7').contains(&(*c as char)) {
+                                result += "\\ ";
+                            }
+                            result.push(*c as char);
+                        },
                     }
+                    last_oct_escape_not_full = oct_escape_not_full;
                 }
                 result.push('"');
                 result
