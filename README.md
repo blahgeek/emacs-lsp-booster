@@ -42,7 +42,7 @@ Overall, this _lsp server wrapper_ strategy achieves similar result as the nativ
 Generally, what you need to do is:
 
 1. Wrap your lsp server command with this `emacs-lsp-booster` executable.
-   For example, if the original lsp server command is `pyright-langserver --stdio`, configure lsp-mode or eglot to run `emacs-lsp-booster [flags] pyright-langserver --stdio` instead.
+   For example, if the original lsp server command is `pyright-langserver --stdio`, configure lsp-mode or eglot to run `emacs-lsp-booster [flags --] pyright-langserver --stdio` instead.
 2. Advise or update the json parsing function in `lsp-mode` or `eglot` to parse any bytecode input seen, prior to parsing it as json.
 
 See more detailed configuration steps below.
