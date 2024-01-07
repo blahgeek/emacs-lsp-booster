@@ -60,6 +60,52 @@ Alternatively, you may build the target locally:
 
 Then, put the `emacs-lsp-booster` binary in your $PATH (e.g. `~/.local/bin`).
 
+#### On nix
+
+There is a flake to simplify installation for nix-based systems.
+To use, add it to your flake inputs, and enable the overlay:
+
+``` nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/«version»";
+    emacs-lsp-booster.url = "github:blahgeek/emacs-lsp-booster";
+    # The emacs-lsp-booster flake itself depends on `nixpkgs` and
+    # `flake-utils`; you might want to make both of these inputs
+    # follow the ones in your configuration.
+    #
+    # emacs-lsp-booster.inputs.nixpkgs.follows = "nixpkgs";
+    # emacs-lsp-booster.inputs.flake-utils.follows = "flake-utils";
+  };
+
+  outputs = { emacs-lsp-booster, ...}:
+    let my-overlays = {
+          nixpkgs.overlays = [
+            «other-overlays»
+            emacs-lsp-booster.overlays.default
+          ];
+        };
+    in {
+      nixosConfigurations.«hostname» = nixpkgs.lib.nixosSystem rec {
+        system = «system»;
+        modules = [
+          «other-modules»
+          my-overlays
+        ];
+      };
+    };
+}
+```
+
+You can then access the package as `nixpkgs.emacs-lsp-booster`,
+e.g., by putting something like
+
+``` nix
+environment.systemPackages = [ pkgs.emacs-lsp-booster ];
+```
+
+into your `configuration.nix`.
+
 ### Configure `lsp-mode`
 
 > [!NOTE]  
