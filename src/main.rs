@@ -24,11 +24,11 @@ struct Cli {
     json_object_type: bytecode::ObjectType,
 
     #[arg(long, default_value = "nil",
-          help = "Which lisp value is used to represent a JSON null value. Support :SYMBOL or nil.\nMust match what lsp client expects.\n")]
+          help = "Which lisp value is used to represent a JSON null value. Support :keyword or nil.\nMust match what lsp client expects.\n")]
     json_null_value: bytecode::LispObject,
 
     #[arg(long, default_value = "nil",
-          help = "Which lisp value is used to represent a JSON false value. Support :SYMBOL or nil.\nMust match what lsp client expects.\n")]
+          help = "Which lisp value is used to represent a JSON false value. Support :keyword or nil.\nMust match what lsp client expects.\n")]
     json_false_value: bytecode::LispObject,
 }
 
