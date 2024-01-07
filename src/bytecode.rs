@@ -48,7 +48,9 @@ impl LispObject {
                     if c == '\"' || c == '\\' {
                         result.push('\\');
                         result.push(c);
-                    } else if (c as u32) < 32 || (c as u32) == 127 {  // not printable
+                    } else if (c as u32) < 32 || (c as u32) == 127 {
+                        // not printable
+                        // NOTE: cannot use escape for c in 128..=255, otherwise the string would become unibyte
                         result += &format!("\\{:03o}", c as u32);
                     } else {
                         result.push(c);
