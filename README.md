@@ -49,7 +49,7 @@ See more detailed configuration steps below.
 
 ### Obtain or build `emacs-lsp-booster`
 
-For linux users, you may download the prebuilt binary from [release](https://github.com/blahgeek/emacs-lsp-booster/releases).
+For Linux or Windows users, you may download the prebuilt binary from [release](https://github.com/blahgeek/emacs-lsp-booster/releases).
 *(The macOS binary in the release page lacks proper code signing for now.)*
 
 Alternatively, you may build the target locally:
