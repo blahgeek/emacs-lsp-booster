@@ -1,7 +1,7 @@
 use std::sync::{mpsc, Arc, atomic::{AtomicI32, self}};
 
 use log::{warn, info, debug};
-use anyhow::Result;
+use anyhow::{Result, Context};
 use serde_json as json;
 
 use crate::{rpcio, bytecode::{self, BytecodeOptions}};
@@ -122,13 +122,17 @@ pub fn run_app_forever(client_reader: impl std::io::Read + Send + 'static,
         let proc_stdin = proc.stdin.take().unwrap();
         std::thread::spawn(move || {
             debug!("Started client->server write thread");
-            process_channel_to_writer(c2s_channel_sub, Some(c2s_channel_counter), proc_stdin).unwrap();
+            process_channel_to_writer(c2s_channel_sub, Some(c2s_channel_counter), proc_stdin)
+                .with_context(|| "Client->server write thread failed")
+                .unwrap();
             debug!("Finished client->server write thread");
         });
     }
     std::thread::spawn(move || {
         debug!("Started server->client write thread");
-        process_channel_to_writer(s2c_channel_sub, None, client_writer).unwrap();
+        process_channel_to_writer(s2c_channel_sub, None, client_writer)
+            .with_context(|| "Server->client write thread failed")
+            .unwrap();
         debug!("Finished server->client write thread");
     });
     {
@@ -136,14 +140,18 @@ pub fn run_app_forever(client_reader: impl std::io::Read + Send + 'static,
         let proc_stdout = proc.stdout.take().unwrap();
         std::thread::spawn(move || {
             debug!("Started server->client read thread");
-            process_server_reader(proc_stdout, s2c_channel_pub, options.bytecode_options).unwrap();
+            process_server_reader(proc_stdout, s2c_channel_pub, options.bytecode_options)
+                .with_context(|| "Server->client read thread failed")
+                .unwrap();
             debug!("Finished server->client read thread");
         });
     }
     std::thread::spawn(move || {
         debug!("Started client->server read thread");
         process_client_reader(
-            client_reader, c2s_channel_pub, c2s_channel_counter, s2c_channel_pub).unwrap();
+            client_reader, c2s_channel_pub, c2s_channel_counter, s2c_channel_pub)
+            .with_context(|| "Client->server read thread failed")
+            .unwrap();
         debug!("Finished client->server read thread");
     });
 
