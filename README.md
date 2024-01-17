@@ -51,6 +51,7 @@ See more detailed configuration steps below.
 
 For Linux or Windows users, you may download the prebuilt binary from [release](https://github.com/blahgeek/emacs-lsp-booster/releases).
 *(The macOS binary in the release page lacks proper code signing for now.)*
+A flake for nix users is available [here](https://github.com/slotThe/emacs-lsp-booster-flake).
 
 Alternatively, you may build the target locally:
 
