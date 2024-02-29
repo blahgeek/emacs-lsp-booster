@@ -1,9 +1,8 @@
-use anyhow::{Result, bail};
+use anyhow::{bail, Result};
 use clap::Parser;
 
 use emacs_lsp_booster::app;
 use emacs_lsp_booster::bytecode;
-
 
 #[derive(Parser)]
 #[command(long_about = None, about = None,
@@ -15,26 +14,40 @@ struct Cli {
     #[arg(last = true)]
     server_cmd: Vec<String>,
 
-    #[arg(short = 'n', long,
-          help = "Disable bytecode generation. Simply forward server json as-is. Useful for debugging or benchmarking.")]
+    #[arg(
+        short = 'n',
+        long,
+        help = "Disable bytecode generation. Simply forward server json as-is. Useful for debugging or benchmarking."
+    )]
     disable_bytecode: bool,
 
-    #[arg(long, default_value = "plist",
-          help = "Lisp type used to represent a JSON object. Plist is the most performant one.\nMust match what lsp client expects.\n")]
+    #[arg(
+        long,
+        default_value = "plist",
+        help = "Lisp type used to represent a JSON object. Plist is the most performant one.\nMust match what lsp client expects.\n"
+    )]
     json_object_type: bytecode::ObjectType,
 
-    #[arg(long, default_value = "nil",
-          help = "Which lisp value is used to represent a JSON null value. Support :keyword or nil.\nMust match what lsp client expects.\n")]
+    #[arg(
+        long,
+        default_value = "nil",
+        help = "Which lisp value is used to represent a JSON null value. Support :keyword or nil.\nMust match what lsp client expects.\n"
+    )]
     json_null_value: bytecode::LispObject,
 
-    #[arg(long, default_value = "nil",
-          help = "Which lisp value is used to represent a JSON false value. Support :keyword or nil.\nMust match what lsp client expects.\n")]
+    #[arg(
+        long,
+        default_value = "nil",
+        help = "Which lisp value is used to represent a JSON false value. Support :keyword or nil.\nMust match what lsp client expects.\n"
+    )]
     json_false_value: bytecode::LispObject,
 }
 
 fn parse_args<T, S>(args: T) -> Cli
-where T: IntoIterator<Item=S>,
-      S: Into<String> {
+where
+    T: IntoIterator<Item = S>,
+    S: Into<String>,
+{
     let args = args.into_iter().map(|x| x.into()).collect::<Vec<String>>();
     // backward compatible. support `emacs-lsp-booster server_cmd args...` directly
     if args.len() > 1 && !args[1].starts_with('-') && !args.contains(&"--".into()) {
@@ -48,7 +61,9 @@ where T: IntoIterator<Item=S>,
 
 fn main() -> Result<()> {
     let cli = parse_args(std::env::args());
-    env_logger::Builder::new().filter_level(cli.verbose.log_level_filter()).init();
+    env_logger::Builder::new()
+        .filter_level(cli.verbose.log_level_filter())
+        .init();
 
     if cli.server_cmd.is_empty() {
         bail!("Please specify the server command");
@@ -64,14 +79,22 @@ fn main() -> Result<()> {
     let mut cmd = std::process::Command::new(&cli.server_cmd[0]);
     cmd.args(&cli.server_cmd[1..]);
 
-    let exit_status = app::run_app_forever(std::io::stdin(), std::io::stdout(), cmd, app::AppOptions {
-        bytecode_options: if !cli.disable_bytecode {
-            Some(bytecode::BytecodeOptions {
-                object_type: cli.json_object_type,
-                null_value: cli.json_null_value,
-                false_value: cli.json_false_value,
-            }) } else { None },
-    })?;
+    let exit_status = app::run_app_forever(
+        std::io::stdin(),
+        std::io::stdout(),
+        cmd,
+        app::AppOptions {
+            bytecode_options: if !cli.disable_bytecode {
+                Some(bytecode::BytecodeOptions {
+                    object_type: cli.json_object_type,
+                    null_value: cli.json_null_value,
+                    false_value: cli.json_false_value,
+                })
+            } else {
+                None
+            },
+        },
+    )?;
     std::process::exit(exit_status.code().unwrap_or(1))
 }
 
@@ -84,14 +107,28 @@ fn test_parse_args() {
     let cli = parse_args(vec!["emacs-lsp-booster", "--", "server_cmd", "arg1"]);
     assert_eq!(cli.server_cmd, vec!["server_cmd", "arg1"]);
 
-    let cli = parse_args(vec!["emacs-lsp-booster", "-v",
-                              "--json-object-type", "hashtable",
-                              "--json-null-value", ":null",
-                              "--json-false-value", ":json-false",
-                              "--", "server_cmd", "arg1"]);
+    let cli = parse_args(vec![
+        "emacs-lsp-booster",
+        "-v",
+        "--json-object-type",
+        "hashtable",
+        "--json-null-value",
+        ":null",
+        "--json-false-value",
+        ":json-false",
+        "--",
+        "server_cmd",
+        "arg1",
+    ]);
     assert_eq!(cli.verbose.log_level_filter(), log::LevelFilter::Debug);
     assert_eq!(cli.server_cmd, vec!["server_cmd", "arg1"]);
     assert_eq!(cli.json_object_type, bytecode::ObjectType::Hashtable);
-    assert_eq!(cli.json_null_value, bytecode::LispObject::Keyword("null".into()));
-    assert_eq!(cli.json_false_value, bytecode::LispObject::Keyword("json-false".into()));
+    assert_eq!(
+        cli.json_null_value,
+        bytecode::LispObject::Keyword("null".into())
+    );
+    assert_eq!(
+        cli.json_false_value,
+        bytecode::LispObject::Keyword("json-false".into())
+    );
 }

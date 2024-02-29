@@ -1,5 +1,5 @@
+use serde::{Deserialize, Serialize};
 use serde_json as json;
-use serde::{ Deserialize, Serialize };
 
 // or notification
 #[derive(Serialize, Deserialize)]
