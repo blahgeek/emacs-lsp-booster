@@ -1,21 +1,25 @@
-use serde_json as json;
 use anyhow::Result;
-use tempfile;
+use serde_json as json;
 
 use emacs_lsp_booster::bytecode;
-
 
 fn run_one_test(json_str: &str, object_type: bytecode::ObjectType) -> Result<()> {
     let json_value: json::Value = json::from_str(json_str)?;
     let json_str_nowhitespaces = json_value.to_string();
-    let bytecode = bytecode::generate_bytecode_repl(&json_value, bytecode::BytecodeOptions {
-        object_type: object_type.clone(),
-        ..Default::default()
-    })?;
+    let bytecode = bytecode::generate_bytecode_repl(
+        &json_value,
+        bytecode::BytecodeOptions {
+            object_type,
+            ..Default::default()
+        },
+    )?;
 
-    eprintln!("Json: {} bytes, Bytecode: {} bytes, ratio={}",
-              json_str_nowhitespaces.len(), bytecode.len(),
-              bytecode.len() as f64 / json_str_nowhitespaces.len() as f64);
+    eprintln!(
+        "Json: {} bytes, Bytecode: {} bytes, ratio={}",
+        json_str_nowhitespaces.len(),
+        bytecode.len(),
+        bytecode.len() as f64 / json_str_nowhitespaces.len() as f64
+    );
 
     let tmpdir = tempfile::tempdir()?;
     let json_file = tmpdir.path().join("data.json");
@@ -25,19 +29,22 @@ fn run_one_test(json_str: &str, object_type: bytecode::ObjectType) -> Result<()>
     std::fs::write(&bytecode_file, bytecode.as_bytes())?;
 
     let elisp_file = tmpdir.path().join("script.el");
-    let elisp_code = format!(include_str!("./benchmark_and_compare.template.el"),
-                             json_file.display(),
-                             bytecode_file.display(),
-                             match object_type {
-                                 bytecode::ObjectType::Plist => "plist",
-                                 bytecode::ObjectType::Hashtable => "hash-table",
-                                 bytecode::ObjectType::Alist => "alist",
-                             });
+    let elisp_code = format!(
+        include_str!("./benchmark_and_compare.template.el"),
+        json_file.display(),
+        bytecode_file.display(),
+        match object_type {
+            bytecode::ObjectType::Plist => "plist",
+            bytecode::ObjectType::Hashtable => "hash-table",
+            bytecode::ObjectType::Alist => "alist",
+        }
+    );
     std::fs::write(&elisp_file, elisp_code.as_bytes())?;
 
     let mut child = std::process::Command::new("emacs")
         .arg("--batch")
-        .arg("-l").arg(elisp_file.as_os_str())
+        .arg("-l")
+        .arg(elisp_file.as_os_str())
         .stdout(std::process::Stdio::inherit())
         .stderr(std::process::Stdio::inherit())
         .spawn()?;
@@ -50,32 +57,54 @@ fn run_one_test(json_str: &str, object_type: bytecode::ObjectType) -> Result<()>
 #[test]
 fn test_bytecode() {
     // unicode test
-    run_one_test(r#"{"a":"ÀÁÂÃÄÅÆÇÈÉÊËÌ abcd \n 你好世界"}"#, bytecode::ObjectType::Plist).unwrap();
+    run_one_test(
+        r#"{"a":"ÀÁÂÃÄÅÆÇÈÉÊËÌ abcd \n 你好世界"}"#,
+        bytecode::ObjectType::Plist,
+    )
+    .unwrap();
 
-    for object_type in vec![bytecode::ObjectType::Plist,
-                            bytecode::ObjectType::Alist,
-                            bytecode::ObjectType::Hashtable] {
-        eprintln!("Testing completion.json (~100KB), object type = {:?}", object_type);
+    for object_type in [
+        bytecode::ObjectType::Plist,
+        bytecode::ObjectType::Alist,
+        bytecode::ObjectType::Hashtable,
+    ] {
+        eprintln!(
+            "Testing completion.json (~100KB), object type = {:?}",
+            object_type
+        );
         run_one_test(include_str!("./data/completion.json"), object_type).unwrap();
 
-        eprintln!("Testing completion2.json (~100KB), object type = {:?}", object_type);
+        eprintln!(
+            "Testing completion2.json (~100KB), object type = {:?}",
+            object_type
+        );
         run_one_test(include_str!("./data/completion2.json"), object_type).unwrap();
 
-        eprintln!("Testing completion3.json (~4KB), object type = {:?}", object_type);
+        eprintln!(
+            "Testing completion3.json (~4KB), object type = {:?}",
+            object_type
+        );
         run_one_test(include_str!("./data/completion3.json"), object_type).unwrap();
 
-        eprintln!("Testing publishDiagnostics.json (~12KB), object type = {:?}", object_type);
+        eprintln!(
+            "Testing publishDiagnostics.json (~12KB), object type = {:?}",
+            object_type
+        );
         run_one_test(include_str!("./data/publishDiagnostics.json"), object_type).unwrap();
 
-        eprintln!("Testing publishDiagnostics2.json (~12KB), object type = {:?}", object_type);
+        eprintln!(
+            "Testing publishDiagnostics2.json (~12KB), object type = {:?}",
+            object_type
+        );
         run_one_test(include_str!("./data/publishDiagnostics2.json"), object_type).unwrap();
     }
 
     {
         eprintln!("Testing huge array (100000 elements)");
         let value = json::Value::Array(
-            (0..100000).map(|x| json::Value::String(format!("{}", x)))
-                .collect()
+            (0..100000)
+                .map(|x| json::Value::String(format!("{}", x)))
+                .collect(),
         );
         run_one_test(&value.to_string(), bytecode::ObjectType::Plist).unwrap();
     }
@@ -83,9 +112,9 @@ fn test_bytecode() {
     {
         eprintln!("Testing huge map (100000 elements)");
         let value = json::Value::Object(
-            (0..100000).map(|x| (format!("x{}", x),
-                                 json::Value::Number(x.into())))
-                .collect()
+            (0..100000)
+                .map(|x| (format!("x{}", x), json::Value::Number(x.into())))
+                .collect(),
         );
         run_one_test(&value.to_string(), bytecode::ObjectType::Plist).unwrap();
     }

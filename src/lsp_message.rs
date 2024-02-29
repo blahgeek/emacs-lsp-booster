@@ -48,7 +48,7 @@ mod test {
         assert_eq!(req.jsonrpc, "2.0");
         assert_eq!(req.id, Some(1));
         assert_eq!(req.method, "initialize");
-        assert_eq!(req.is_notification(), false);
+        assert!(!req.is_notification());
     }
 
     #[test]
@@ -61,7 +61,7 @@ mod test {
         let req: LspRequest = json::from_str(json_str).unwrap();
         assert_eq!(req.id, None);
         assert_eq!(req.method, "initialized");
-        assert_eq!(req.is_notification(), true);
+        assert!(req.is_notification());
     }
 
     #[test]
@@ -76,6 +76,9 @@ mod test {
             }),
         };
         let resp_str = json::to_string(&resp).unwrap();
-        assert_eq!(resp_str, r#"{"jsonrpc":"2.0","id":1,"result":null,"error":{"code":123,"message":"asdf"}}"#);
+        assert_eq!(
+            resp_str,
+            r#"{"jsonrpc":"2.0","id":1,"result":null,"error":{"code":123,"message":"asdf"}}"#
+        );
     }
 }
