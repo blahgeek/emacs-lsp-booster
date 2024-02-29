@@ -1,7 +1,7 @@
-use std::{str::FromStr, io::Write};
+use std::{io::Write, str::FromStr};
 
+use anyhow::{bail, Result};
 use log::trace;
-use anyhow::{Result, bail};
 
 // return empty string on EOF
 pub fn rpc_read(reader: &mut impl std::io::BufRead) -> Result<String> {
@@ -32,7 +32,9 @@ pub fn rpc_read(reader: &mut impl std::io::BufRead) -> Result<String> {
 }
 
 pub fn rpc_write<T>(writer: &mut std::io::BufWriter<T>, content: &str) -> Result<()>
-where T: std::io::Write {
+where
+    T: std::io::Write,
+{
     write!(writer, "Content-Length: {}\r\n", content.len())?;
     write!(writer, "\r\n")?;
     writer.write_all(content.as_bytes())?;
