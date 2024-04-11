@@ -104,7 +104,7 @@ Done! Now try to use lsp-mode as usual.
 
 ### Configure `eglot`
 
-Please see https://github.com/blahgeek/emacs-lsp-booster/issues/1 for information on configuring `eglot`. 
+Please see https://github.com/jdtsmith/eglot-booster for information on configuring `eglot`. 
 Huge thanks to @jdtsmith
 
 ### How to verify it's working
