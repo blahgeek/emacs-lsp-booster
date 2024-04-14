@@ -1,4 +1,4 @@
-use emacs::{defun, Env, Result, Value, IntoLisp};
+use emacs::{defun, Env, IntoLisp, Result, Value};
 use serde_json as json;
 
 // Emacs won't load the module without this.
@@ -11,36 +11,36 @@ fn init(env: &Env) -> Result<Value<'_>> {
 }
 
 fn json_to_lisp<'a>(env: &'a Env, val: &json::Value) -> Result<Value<'a>> {
-    match val {
-        &json::Value::Null | &json::Value::Bool(false) =>
-            ().into_lisp(env),
-        &json::Value::Bool(true) =>
-            true.into_lisp(env),
-        &json::Value::Number(ref num) =>
+    match &val {
+        json::Value::Null | &json::Value::Bool(false) => ().into_lisp(env),
+        json::Value::Bool(true) => true.into_lisp(env),
+        json::Value::Number(num) => {
             if num.is_f64() {
                 num.as_f64().unwrap().into_lisp(env)
             } else if num.is_i64() {
                 num.as_i64().unwrap().into_lisp(env)
             } else {
                 num.as_u64().unwrap().into_lisp(env)
-            },
-        &json::Value::String(ref s) =>
-            s.into_lisp(env),
-        &json::Value::Array(ref arr) => {
-            let vals = arr.iter().map(|x| json_to_lisp(env, x)).collect::<Result<Vec<_>>>()?;
+            }
+        }
+        json::Value::String(s) => s.into_lisp(env),
+        json::Value::Array(arr) => {
+            let vals = arr
+                .iter()
+                .map(|x| json_to_lisp(env, x))
+                .collect::<Result<Vec<_>>>()?;
             env.vector(&vals)
-        },
-        &json::Value::Object(ref map) => {
+        }
+        json::Value::Object(map) => {
             let mut vals: Vec<Value<'a>> = Vec::new();
             for (k, v) in map {
                 vals.push(env.intern(&format!(":{}", k))?);
                 vals.push(json_to_lisp(env, v)?);
             }
             env.list(&vals)
-        },
+        }
     }
 }
-
 
 #[defun]
 fn parse(env: &Env, s: String) -> Result<Value<'_>> {
