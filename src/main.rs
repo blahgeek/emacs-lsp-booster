@@ -1,4 +1,5 @@
 use anyhow::{Result, bail};
+use log::trace;
 use clap::Parser;
 
 use emacs_lsp_booster::app;
@@ -61,7 +62,15 @@ fn main() -> Result<()> {
         std::process::exit(1);
     }));
 
-    let mut cmd = std::process::Command::new(&cli.server_cmd[0]);
+    // In windows, Command::new cannot find .cmd files, so use `which` to do that
+    // https://github.com/rust-lang/rust/issues/37519
+    let server_cmd_prog = if cfg!(windows) {
+        which::which(&cli.server_cmd[0])?
+    } else {
+        std::path::PathBuf::from(&cli.server_cmd[0])
+    };
+    trace!("Using server prog: {:?}", server_cmd_prog);
+    let mut cmd = std::process::Command::new(&server_cmd_prog);
     cmd.args(&cli.server_cmd[1..]);
 
     let exit_status = app::run_app_forever(std::io::stdin(), std::io::stdout(), cmd, app::AppOptions {
