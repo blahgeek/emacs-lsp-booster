@@ -94,9 +94,8 @@ Then, put the `emacs-lsp-booster` binary in your $PATH (e.g. `~/.local/bin`).
              (not (functionp 'json-rpc-connection))  ;; native json-rpc
              (executable-find "emacs-lsp-booster"))
         (progn
-          (let ((command-from-exec-path (executable-find (car orig-result))))
-            (when command-from-exec-path
-                  (setcar orig-result command-from-exec-path)))
+          (when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
+            (setcar orig-result command-from-exec-path))
           (message "Using emacs-lsp-booster for %s!" orig-result)
           (cons "emacs-lsp-booster" orig-result))
       orig-result)))
