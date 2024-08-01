@@ -1,4 +1,4 @@
-pub mod bytecode;
-pub mod rpcio;
-mod lsp_message;
 pub mod app;
+pub mod bytecode;
+mod lsp_message;
+pub mod rpcio;

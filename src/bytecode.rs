@@ -1,10 +1,9 @@
 use std::collections::BTreeMap;
 use std::str::FromStr;
 
-use anyhow::{Result, bail};
+use anyhow::{bail, Result};
 use serde_json as json;
 use smallvec::smallvec;
-
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum LispObject {
@@ -13,7 +12,7 @@ pub enum LispObject {
     UnibyteStr(Vec<u8>),
     Str(String),
     Int(i64),
-    Float(String),  // use string for Eq and Ord
+    Float(String), // use string for Eq and Ord
     Nil,
     T,
     Vector(Vec<LispObject>),
@@ -22,12 +21,13 @@ pub enum LispObject {
 impl FromStr for LispObject {
     type Err = anyhow::Error;
 
+    #[allow(clippy::manual_strip)]
     fn from_str(s: &str) -> Result<Self> {
         if s == "nil" {
             Ok(Self::Nil)
         } else if s == "t" {
             Ok(Self::T)
-        } else if s.starts_with(":") {
+        } else if s.starts_with(':') {
             Ok(Self::Keyword(s[1..].to_string()))
         } else {
             bail!("Supported LispObject: {}", s)
@@ -58,7 +58,7 @@ impl LispObject {
                 }
                 result.push('"');
                 result
-            },
+            }
             LispObject::UnibyteStr(vec) => {
                 let mut result = String::new();
                 result.reserve(vec.len() * 4 + 2);
@@ -77,35 +77,40 @@ impl LispObject {
                         127 => result += "\\d",
                         27 => result += "\\e",
                         // NOTE: do not use 0..=7 in this branch, because it takes one more byte than the next branch
-                        8..=26 => {  // \^@ \^A \^B ... \^Z
+                        14..=26 => {
+                            // \^@ \^A \^B ... \^Z
                             result += &format!("\\^{}", (*c as u32 + 64) as u8 as char);
-                        },
-                        0..=7 | 27..=31 | 128..=255 | 34 | 92 => {  // oct, for unprintable and '"' and '\\'
+                        }
+                        0..=7 | 27..=31 | 128..=255 | 34 | 92 => {
+                            // oct, for unprintable and '"' and '\\'
                             let oct_s = format!("\\{:o}", *c as u32);
                             if oct_s.len() < 4 {
                                 oct_escape_not_full = true;
                             }
                             result += &oct_s;
-                        },
-                        _ => {  // printable
+                        }
+                        _ => {
+                            // printable
                             // https://www.gnu.org/software/emacs/manual/html_node/elisp/Non_002dASCII-in-St
                             if last_oct_escape_not_full && ('0'..='7').contains(&(*c as char)) {
                                 result += "\\ ";
                             }
                             result.push(*c as char);
-                        },
+                        }
                     }
                     last_oct_escape_not_full = oct_escape_not_full;
                 }
                 result.push('"');
                 result
-            },
+            }
             LispObject::Int(i) => i.to_string(),
             LispObject::Float(s) => s.clone(),
             LispObject::Nil => "nil".into(),
             LispObject::T => "t".into(),
-            LispObject::Vector(v) =>
-                format!("[{}]", v.iter().map(|x| x.to_repl()).collect::<Vec<_>>().join(" "))
+            LispObject::Vector(v) => format!(
+                "[{}]",
+                v.iter().map(|x| x.to_repl()).collect::<Vec<_>>().join(" ")
+            ),
         }
     }
 }
@@ -122,8 +127,9 @@ const CV_TWO_LEVEL_IDX_BEGIN: u32 = CV_NORMAL_SLOT_COUNT;
 const CV_TWO_LEVEL_DATA_BEGIN: u32 = CV_NORMAL_SLOT_COUNT + CV_TWO_LEVEL_VECTOR_SIZE;
 
 #[allow(dead_code)]
+#[derive(Copy, Clone)]
 enum Op {
-    PushConstant(u32),  // support more than u16, will expand to multiple ops
+    PushConstant(u32), // support more than u16, will expand to multiple ops
     Call(u16),
     StackRef(u16),
     List(u8),
@@ -137,59 +143,65 @@ enum Op {
 impl Op {
     fn get_stack_delta(&self) -> i32 {
         match self {
-            &Self::PushConstant(_) => 1,
-            &Self::Call(n) => -(n as i32 + 1) + 1,
-            &Self::StackRef(_) => 1,
-            &Self::List(n) => -(n as i32) + 1,
-            &Self::Discard => -1,
-            &Self::ASet => -3 + 1,
-            &Self::Add1 => 0,
-            &Self::Cons => -2 + 1,
-            &Self::Return => -1,
+            Self::PushConstant(_) => 1,
+            Self::Call(n) => -(*n as i32 + 1) + 1,
+            Self::StackRef(_) => 1,
+            Self::List(n) => -(*n as i32) + 1,
+            Self::Discard => -1,
+            Self::ASet => -3 + 1,
+            Self::Add1 => 0,
+            Self::Cons => -2 + 1,
+            Self::Return => -1,
         }
     }
 
-    fn to_code(&self) -> Result<smallvec::SmallVec<[u8; 3]>> {
+    fn to_code(self) -> Result<smallvec::SmallVec<[u8; 3]>> {
         match self {
-            &Self::PushConstant(v) if v < 64 =>
-                Ok(smallvec![(192 + v) as u8]),
-            &Self::PushConstant(v) if v < CV_NORMAL_SLOT_COUNT =>
-                Ok(smallvec![129, (v & 0xff) as u8, (v >> 8) as u8]),
-            &Self::PushConstant(v) if v < (CV_NORMAL_SLOT_COUNT + CV_TWO_LEVEL_VECTOR_SIZE * CV_TWO_LEVEL_VECTOR_SIZE) => {
+            Self::PushConstant(v) if v < 64 => Ok(smallvec![(192 + v) as u8]),
+            Self::PushConstant(v) if v < CV_NORMAL_SLOT_COUNT => {
+                Ok(smallvec![129, (v & 0xff) as u8, (v >> 8) as u8])
+            }
+            Self::PushConstant(v)
+                if v < (CV_NORMAL_SLOT_COUNT
+                    + CV_TWO_LEVEL_VECTOR_SIZE * CV_TWO_LEVEL_VECTOR_SIZE) =>
+            {
                 let mut result = smallvec![];
                 let two_level_i = (v - CV_NORMAL_SLOT_COUNT) / CV_TWO_LEVEL_VECTOR_SIZE;
                 let two_level_j = (v - CV_NORMAL_SLOT_COUNT) % CV_TWO_LEVEL_VECTOR_SIZE;
 
                 // get vector
                 let index_for_i = two_level_i + CV_TWO_LEVEL_DATA_BEGIN;
-                result.extend_from_slice(&[129, (index_for_i & 0xff) as u8, (index_for_i >> 8) as u8]);
+                result.extend_from_slice(&[
+                    129,
+                    (index_for_i & 0xff) as u8,
+                    (index_for_i >> 8) as u8,
+                ]);
                 // get index
                 let index_for_j = two_level_j + CV_TWO_LEVEL_IDX_BEGIN;
-                result.extend_from_slice(&[129, (index_for_j & 0xff) as u8, (index_for_j >> 8) as u8]);
+                result.extend_from_slice(&[
+                    129,
+                    (index_for_j & 0xff) as u8,
+                    (index_for_j >> 8) as u8,
+                ]);
                 // aref
                 result.push(72);
 
                 Ok(result)
-            },
-            &Self::PushConstant(v) =>
-                bail!("Too many constants! {}", v),
-            &Self::Call(v) if v <= 5 =>
-                Ok(smallvec![(32 + v) as u8]),
-            &Self::Call(v) if v < (1 << 8) =>
-                Ok(smallvec![(32 + 6) as u8, v as u8]),
-            &Self::Call(v) =>
-                Ok(smallvec![(32 + 7) as u8, (v & 0xff) as u8, (v >> 8) as u8]),
-            &Self::StackRef(v) if (1..=4).contains(&v) =>
-                Ok(smallvec![v as u8]),
-            &Self::StackRef(_) => unimplemented!(),
-            &Self::List(v) if v == 0 => unreachable!(),
-            &Self::List(v) if (1..=4).contains(&v) => Ok(smallvec![66 + v]),
-            &Self::List(v) => Ok(smallvec![175, v]),
-            &Self::Discard => Ok(smallvec![136]),
-            &Self::ASet => Ok(smallvec![73]),
-            &Self::Add1 => Ok(smallvec![84]),
-            &Self::Cons => Ok(smallvec![66]),
-            &Self::Return => Ok(smallvec![135]),
+            }
+            Self::PushConstant(v) => bail!("Too many constants! {}", v),
+            Self::Call(v) if v <= 5 => Ok(smallvec![(32 + v) as u8]),
+            Self::Call(v) if v < (1 << 8) => Ok(smallvec![(32 + 6) as u8, v as u8]),
+            Self::Call(v) => Ok(smallvec![(32 + 7) as u8, (v & 0xff) as u8, (v >> 8) as u8]),
+            Self::StackRef(v) if (1..=4).contains(&v) => Ok(smallvec![v as u8]),
+            Self::StackRef(_) => unimplemented!(),
+            Self::List(0) => unreachable!(),
+            Self::List(v) if (1..=4).contains(&v) => Ok(smallvec![66 + v]),
+            Self::List(v) => Ok(smallvec![175, v]),
+            Self::Discard => Ok(smallvec![136]),
+            Self::ASet => Ok(smallvec![73]),
+            Self::Add1 => Ok(smallvec![84]),
+            Self::Cons => Ok(smallvec![66]),
+            Self::Return => Ok(smallvec![135]),
         }
     }
 }
@@ -224,7 +236,7 @@ struct BytecodeCompiler {
     options: BytecodeOptions,
 
     ops: Vec<Op>,
-    constants: BTreeMap<LispObject, (u32, u32)>,  // (index, count)
+    constants: BTreeMap<LispObject, (u32, u32)>, // (index, count)
 }
 
 impl BytecodeCompiler {
@@ -272,10 +284,14 @@ impl BytecodeCompiler {
         }
     }
 
-    fn compile_value_map_plist_or_alist(&mut self, map: &json::Map<String, json::Value>, alist: bool) {
+    fn compile_value_map_plist_or_alist(
+        &mut self,
+        map: &json::Map<String, json::Value>,
+        alist: bool,
+    ) {
         let list_len = if alist { map.len() } else { map.len() * 2 };
         // see below
-        if list_len < (1 << 16) && list_len >= (1 << 8) {
+        if ((1 << 8)..(1 << 16)).contains(&list_len) {
             self.compile_constant_op(LispObject::Symbol("list".into()));
         }
 
@@ -325,35 +341,35 @@ impl BytecodeCompiler {
 
     fn compile_value(&mut self, value: &json::Value) {
         match value {
-            &json::Value::Null => {
+            json::Value::Null => {
                 self.compile_constant_op(self.options.null_value.clone());
-            },
-            &json::Value::Bool(false) => {
+            }
+            json::Value::Bool(false) => {
                 self.compile_constant_op(self.options.false_value.clone());
-            },
-            &json::Value::Bool(true) => {
+            }
+            json::Value::Bool(true) => {
                 self.compile_constant_op(LispObject::T);
-            },
-            &json::Value::Number(ref num) => {
+            }
+            json::Value::Number(ref num) => {
                 if num.is_f64() {
                     self.compile_constant_op(LispObject::Float(num.to_string()));
                 } else {
                     self.compile_constant_op(LispObject::Int(num.as_i64().unwrap()));
                 }
-            },
-            &json::Value::String(ref s) => {
+            }
+            json::Value::String(ref s) => {
                 self.compile_constant_op(LispObject::Str(s.clone()));
-            },
-            &json::Value::Array(ref arr) => {
-                self.compile_value_array(&arr);
-            },
-            &json::Value::Object(ref map) => {
+            }
+            json::Value::Array(ref arr) => {
+                self.compile_value_array(arr);
+            }
+            json::Value::Object(ref map) => {
                 match self.options.object_type {
-                    ObjectType::Plist => self.compile_value_map_plist_or_alist(&map, false),
-                    ObjectType::Alist => self.compile_value_map_plist_or_alist(&map, true),
-                    ObjectType::Hashtable => self.compile_value_map_hashtable(&map),
+                    ObjectType::Plist => self.compile_value_map_plist_or_alist(map, false),
+                    ObjectType::Alist => self.compile_value_map_plist_or_alist(map, true),
+                    ObjectType::Hashtable => self.compile_value_map_hashtable(map),
                 };
-            },
+            }
         }
     }
 
@@ -368,18 +384,25 @@ impl BytecodeCompiler {
         let mut constants_array = self.constants.into_iter().collect::<Vec<_>>();
         constants_array.sort_by_key(
             // if count is same, still sort by the old idx, to increase locality
-            |(_, idx_and_count)| (-(idx_and_count.1 as i32), idx_and_count.0));
-        let index_remap = constants_array.iter().enumerate()
+            |(_, idx_and_count)| (-(idx_and_count.1 as i32), idx_and_count.0),
+        );
+        let index_remap = constants_array
+            .iter()
+            .enumerate()
             .map(|(new_idx, (_, idx_and_count))| (idx_and_count.0, new_idx as u32))
             .collect::<BTreeMap<_, _>>();
 
-        let mut constants_array = constants_array.into_iter().map(|(obj, _)| obj).collect::<Vec<_>>();
+        let mut constants_array = constants_array
+            .into_iter()
+            .map(|(obj, _)| obj)
+            .collect::<Vec<_>>();
         // rearrange constants
         let mut two_level_vectors: Vec<LispObject> = Vec::new();
         // collect two level vectors from the end (reverse order)
         while constants_array.len() > CV_NORMAL_SLOT_COUNT as usize {
             let len = {
-                let remaining = (constants_array.len() - CV_NORMAL_SLOT_COUNT as usize) % CV_TWO_LEVEL_VECTOR_SIZE as usize;
+                let remaining = (constants_array.len() - CV_NORMAL_SLOT_COUNT as usize)
+                    % CV_TWO_LEVEL_VECTOR_SIZE as usize;
                 if remaining == 0 {
                     CV_TWO_LEVEL_VECTOR_SIZE as usize
                 } else {
@@ -387,7 +410,10 @@ impl BytecodeCompiler {
                 }
             };
             let v = constants_array
-                .splice((constants_array.len() - len)..constants_array.len(), Vec::new())
+                .splice(
+                    (constants_array.len() - len)..constants_array.len(),
+                    Vec::new(),
+                )
                 .collect();
             two_level_vectors.push(LispObject::Vector(v));
         }
@@ -422,10 +448,12 @@ impl BytecodeCompiler {
 
     fn into_repl(self) -> Result<String> {
         let (code, constants, max_stack_size) = self.into_bytecode()?;
-        Ok(format!("#[0 {} {} {}]",
-                   LispObject::UnibyteStr(code).to_repl(),
-                   LispObject::Vector(constants).to_repl(),
-                   max_stack_size))
+        Ok(format!(
+            "#[0 {} {} {}]",
+            LispObject::UnibyteStr(code).to_repl(),
+            LispObject::Vector(constants).to_repl(),
+            max_stack_size
+        ))
     }
 }
 
@@ -438,7 +466,6 @@ pub fn generate_bytecode_repl(value: &json::Value, options: BytecodeOptions) -> 
     compiler.compile(value);
     compiler.into_repl()
 }
-
 
 #[test]
 fn test_string_repl() {
