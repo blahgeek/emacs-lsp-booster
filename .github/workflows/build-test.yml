@@ -12,6 +12,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-Dwarnings"
 
 jobs:
   build-and-test:
@@ -21,8 +22,12 @@ jobs:
     steps:
     - name: Install Emacs
       run: sudo apt-get install -y emacs
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    - name: Formatting
+      run: cargo fmt --check
     - name: Build
       run: cargo build --verbose
+    - name: Linting
+      run: cargo clippy --all-targets --all-features
     - name: Run tests
       run: cargo test --verbose -- --nocapture
