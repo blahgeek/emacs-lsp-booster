@@ -1,5 +1,5 @@
-use serde_json as json;
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
+use sonic_rs as json;
 
 // or notification
 #[derive(Serialize, Deserialize)]
@@ -69,13 +69,16 @@ mod test {
         let resp = LspResponse {
             jsonrpc: "2.0".to_string(),
             id: 1,
-            result: json::Value::Null,
+            result: json::Value::new(),
             error: Some(LspResponseError {
                 code: 123,
                 message: "asdf".to_string(),
             }),
         };
         let resp_str = json::to_string(&resp).unwrap();
-        assert_eq!(resp_str, r#"{"jsonrpc":"2.0","id":1,"result":null,"error":{"code":123,"message":"asdf"}}"#);
+        assert_eq!(
+            resp_str,
+            r#"{"jsonrpc":"2.0","id":1,"result":null,"error":{"code":123,"message":"asdf"}}"#
+        );
     }
 }
