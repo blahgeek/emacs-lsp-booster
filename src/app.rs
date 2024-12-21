@@ -164,12 +164,13 @@ fn run_app(client_reader: impl std::io::Read + Send + 'static,
 
 pub fn run_app_stdio(mut server_cmd: std::process::Command,
                      options: AppOptions) -> Result<std::process::ExitStatus> {
-    info!("Running server {:?}", server_cmd);
+    info!("About to run the lsp server with command {:?}", server_cmd);
     let mut proc = server_cmd
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::inherit())
-        .spawn()?;
+        .spawn()
+        .context(format!("Failed to run the lsp server with command: {:?}", server_cmd))?;
 
     run_app(std::io::stdin(), std::io::stdout(),
             proc.stdout.take().unwrap(), proc.stdin.take().unwrap(),
