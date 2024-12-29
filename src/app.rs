@@ -1,15 +1,23 @@
-use std::sync::{mpsc, Arc, atomic::{AtomicI32, self}};
+use std::sync::{
+    atomic::{self, AtomicI32},
+    mpsc, Arc,
+};
 
-use log::{warn, info, debug};
-use anyhow::{Result, Context};
-use serde_json as json;
+use anyhow::{Context, Result};
+use log::{debug, info, warn};
+use sonic_rs as json;
 
-use crate::{rpcio, bytecode::{self, BytecodeOptions}};
 use crate::lsp_message::{LspRequest, LspResponse, LspResponseError};
+use crate::{
+    bytecode::{self, BytecodeOptions},
+    rpcio,
+};
 
-fn process_channel_to_writer(channel_sub: mpsc::Receiver<String>,
-                             channel_counter: Option<Arc<AtomicI32>>,
-                             writer: impl std::io::Write) -> Result<()> {
+fn process_channel_to_writer(
+    channel_sub: mpsc::Receiver<String>,
+    channel_counter: Option<Arc<AtomicI32>>,
+    writer: impl std::io::Write,
+) -> Result<()> {
     let mut bufwriter = std::io::BufWriter::new(writer);
     for msg in channel_sub.iter() {
         if let Some(ref channel_counter) = channel_counter {
@@ -24,27 +32,31 @@ const MAX_PENDING_MSG_COUNT: i32 = 128;
 
 // Read from client, write to server.
 // Or, if server is blocked, reject the request and fake reply when possible
-fn process_client_reader(reader: impl std::io::Read,
-                         server_channel_pub: mpsc::Sender<String>,
-                         server_channel_counter: Arc<AtomicI32>,
-                         client_channel_pub: mpsc::Sender<String>) -> Result<()> {
+fn process_client_reader(
+    reader: impl std::io::Read,
+    server_channel_pub: mpsc::Sender<String>,
+    server_channel_counter: Arc<AtomicI32>,
+    client_channel_pub: mpsc::Sender<String>,
+) -> Result<()> {
     let mut bufreader = std::io::BufReader::new(reader);
     loop {
         let msg = rpcio::rpc_read(&mut bufreader)?;
         if msg.is_empty() {
-            break
+            break;
         }
 
         if server_channel_counter.load(atomic::Ordering::Acquire) >= MAX_PENDING_MSG_COUNT {
             let lsp_request: LspRequest = json::from_str(&msg)?;
             // only cancel when it's not notification
             if !lsp_request.is_notification() {
-                warn!("Buffer full, rejecting request: {} (id={:?})",
-                      lsp_request.method, lsp_request.id);
+                warn!(
+                    "Buffer full, rejecting request: {} (id={:?})",
+                    lsp_request.method, lsp_request.id
+                );
                 let resp = LspResponse {
                     jsonrpc: lsp_request.jsonrpc,
                     id: lsp_request.id.unwrap(),
-                    result: json::Value::Null,
+                    result: json::Value::new(),
                     error: Some(LspResponseError {
                         code: -32803,
                         message: "[emacs-lsp-booster] Server is busy".to_string(),
@@ -62,27 +74,32 @@ fn process_client_reader(reader: impl std::io::Read,
     Ok(())
 }
 
-fn process_server_reader(reader: impl std::io::Read,
-                         channel_pub: mpsc::Sender<String>,
-                         bytecode_options: Option<BytecodeOptions>) -> Result<()> {
+fn process_server_reader(
+    reader: impl std::io::Read,
+    channel_pub: mpsc::Sender<String>,
+    bytecode_options: Option<BytecodeOptions>,
+) -> Result<()> {
     let mut bufreader = std::io::BufReader::new(reader);
     loop {
         let msg = rpcio::rpc_read(&mut bufreader)?;
         if msg.is_empty() {
-            break
+            break;
         }
         if let Some(ref bytecode_options) = bytecode_options {
             let json_val = json::from_str(&msg)?;
             match bytecode::generate_bytecode_repl(&json_val, bytecode_options.clone()) {
                 Ok(bytecode_str) => {
-                    debug!("server->client: json {} bytes; converted to bytecode, {} bytes",
-                           msg.len(), bytecode_str.len());
+                    debug!(
+                        "server->client: json {} bytes; converted to bytecode, {} bytes",
+                        msg.len(),
+                        bytecode_str.len()
+                    );
                     channel_pub.send(bytecode_str)?;
-                    continue
-                },
+                    continue;
+                }
                 Err(err) => {
                     warn!("Failed to convert json to bytecode: {}", err);
-                },
+                }
             }
         }
         debug!("server->client: json {} bytes; forward as-is", msg.len());
@@ -102,7 +119,10 @@ pub fn run_app_forever(client_reader: impl std::io::Read + Send + 'static,
                        options: AppOptions) -> Result<std::process::ExitStatus> {
     info!("About to run the lsp server with command {:?}", server_cmd);
     if let Some(ref bytecode_options) = options.bytecode_options {
-        info!("Will convert server json to bytecode! bytecode options: {:?}", bytecode_options);
+        info!(
+            "Will convert server json to bytecode! bytecode options: {:?}",
+            bytecode_options
+        );
     } else {
         info!("Bytecode disabled! Will forward server json as-is.")
     }
@@ -155,9 +175,13 @@ pub fn run_app_forever(client_reader: impl std::io::Read + Send + 'static,
     std::thread::spawn(move || {
         debug!("Started client->server read thread");
         process_client_reader(
-            client_reader, c2s_channel_pub, c2s_channel_counter, s2c_channel_pub)
-            .with_context(|| "Client->server read thread failed")
-            .unwrap();
+            client_reader,
+            c2s_channel_pub,
+            c2s_channel_counter,
+            s2c_channel_pub,
+        )
+        .with_context(|| "Client->server read thread failed")
+        .unwrap();
         debug!("Finished client->server read thread");
     });
 
