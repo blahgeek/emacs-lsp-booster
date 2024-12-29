@@ -2,7 +2,6 @@ use std::collections::BTreeMap;
 use std::str::FromStr;
 
 use anyhow::{Result, bail};
-use serde_json as json;
 use smallvec::smallvec;
 
 
@@ -242,7 +241,7 @@ impl BytecodeCompiler {
         self.ops.push(Op::PushConstant(idx))
     }
 
-    fn compile_value_array(&mut self, arr: &[json::Value]) {
+    fn compile_value_array(&mut self, arr: &[serde_json::Value]) {
         if arr.is_empty() {
             self.compile_constant_op(LispObject::Symbol("vector".into()));
             self.ops.push(Op::Call(0));
@@ -272,7 +271,7 @@ impl BytecodeCompiler {
         }
     }
 
-    fn compile_value_map_plist_or_alist(&mut self, map: &json::Map<String, json::Value>, alist: bool) {
+    fn compile_value_map_plist_or_alist(&mut self, map: &serde_json::Map<String, serde_json::Value>, alist: bool) {
         let list_len = if alist { map.len() } else { map.len() * 2 };
         // see below
         if list_len < (1 << 16) && list_len >= (1 << 8) {
@@ -305,7 +304,7 @@ impl BytecodeCompiler {
         }
     }
 
-    fn compile_value_map_hashtable(&mut self, map: &json::Map<String, json::Value>) {
+    fn compile_value_map_hashtable(&mut self, map: &serde_json::Map<String, serde_json::Value>) {
         self.compile_constant_op(LispObject::Symbol("make-hash-table".into()));
         self.compile_constant_op(LispObject::Keyword("test".into()));
         self.compile_constant_op(LispObject::Symbol("equal".into()));
@@ -323,31 +322,31 @@ impl BytecodeCompiler {
         }
     }
 
-    fn compile_value(&mut self, value: &json::Value) {
+    fn compile_value(&mut self, value: &serde_json::Value) {
         match value {
-            &json::Value::Null => {
+            &serde_json::Value::Null => {
                 self.compile_constant_op(self.options.null_value.clone());
             },
-            &json::Value::Bool(false) => {
+            &serde_json::Value::Bool(false) => {
                 self.compile_constant_op(self.options.false_value.clone());
             },
-            &json::Value::Bool(true) => {
+            &serde_json::Value::Bool(true) => {
                 self.compile_constant_op(LispObject::T);
             },
-            &json::Value::Number(ref num) => {
+            &serde_json::Value::Number(ref num) => {
                 if num.is_f64() {
                     self.compile_constant_op(LispObject::Float(num.to_string()));
                 } else {
                     self.compile_constant_op(LispObject::Int(num.as_i64().unwrap()));
                 }
             },
-            &json::Value::String(ref s) => {
+            &serde_json::Value::String(ref s) => {
                 self.compile_constant_op(LispObject::Str(s.clone()));
             },
-            &json::Value::Array(ref arr) => {
+            &serde_json::Value::Array(ref arr) => {
                 self.compile_value_array(&arr);
             },
-            &json::Value::Object(ref map) => {
+            &serde_json::Value::Object(ref map) => {
                 match self.options.object_type {
                     ObjectType::Plist => self.compile_value_map_plist_or_alist(&map, false),
                     ObjectType::Alist => self.compile_value_map_plist_or_alist(&map, true),
@@ -357,7 +356,7 @@ impl BytecodeCompiler {
         }
     }
 
-    fn compile(&mut self, value: &json::Value) {
+    fn compile(&mut self, value: &serde_json::Value) {
         self.compile_value(value);
         self.ops.push(Op::Return);
     }
@@ -429,7 +428,7 @@ impl BytecodeCompiler {
     }
 }
 
-pub fn generate_bytecode_repl(value: &json::Value, options: BytecodeOptions) -> Result<String> {
+pub fn generate_bytecode_repl(value: &serde_json::Value, options: BytecodeOptions) -> Result<String> {
     let mut compiler = BytecodeCompiler {
         options,
         ops: Vec::new(),

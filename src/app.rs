@@ -2,7 +2,7 @@ use std::sync::{mpsc, Arc, atomic::{AtomicI32, self}};
 
 use log::{warn, info, debug};
 use anyhow::{Result, Context};
-use serde_json as json;
+use simd_json as json;
 
 use crate::{rpcio, bytecode::{self, BytecodeOptions}};
 use crate::lsp_message::{LspRequest, LspResponse, LspResponseError};
@@ -30,13 +30,15 @@ fn process_client_reader(reader: impl std::io::Read,
                          client_channel_pub: mpsc::Sender<String>) -> Result<()> {
     let mut bufreader = std::io::BufReader::new(reader);
     loop {
-        let msg = rpcio::rpc_read(&mut bufreader)?;
+        let mut msg = rpcio::rpc_read(&mut bufreader)?;
         if msg.is_empty() {
             break
         }
 
         if server_channel_counter.load(atomic::Ordering::Acquire) >= MAX_PENDING_MSG_COUNT {
-            let lsp_request: LspRequest = json::from_str(&msg)?;
+            let lsp_request: LspRequest = unsafe {
+                json::from_str(&mut msg)?
+            };
             // only cancel when it's not notification
             if !lsp_request.is_notification() {
                 warn!("Buffer full, rejecting request: {} (id={:?})",
@@ -44,7 +46,7 @@ fn process_client_reader(reader: impl std::io::Read,
                 let resp = LspResponse {
                     jsonrpc: lsp_request.jsonrpc,
                     id: lsp_request.id.unwrap(),
-                    result: json::Value::Null,
+                    result: serde_json::Value::Null,
                     error: Some(LspResponseError {
                         code: -32803,
                         message: "[emacs-lsp-booster] Server is busy".to_string(),
@@ -67,12 +69,12 @@ fn process_server_reader(reader: impl std::io::Read,
                          bytecode_options: Option<BytecodeOptions>) -> Result<()> {
     let mut bufreader = std::io::BufReader::new(reader);
     loop {
-        let msg = rpcio::rpc_read(&mut bufreader)?;
+        let mut msg = rpcio::rpc_read(&mut bufreader)?;
         if msg.is_empty() {
             break
         }
         if let Some(ref bytecode_options) = bytecode_options {
-            let json_val = json::from_str(&msg)?;
+            let json_val = unsafe {json::from_str(&mut msg)?};
             match bytecode::generate_bytecode_repl(&json_val, bytecode_options.clone()) {
                 Ok(bytecode_str) => {
                     debug!("server->client: json {} bytes; converted to bytecode, {} bytes",
