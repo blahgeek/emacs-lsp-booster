@@ -53,13 +53,10 @@ For Linux or Windows users, you may download the prebuilt binary from [release](
 *(The macOS binary in the release page lacks proper code signing for now.)*
 A flake for nix users is available [here](https://github.com/slotThe/emacs-lsp-booster-flake).
 
-Alternatively, you may build the target locally:
+Alternatively, you may install it from [crates.io](https://crates.io/crates/emacs-lsp-booster):
 
 1. Setup [Rust toolchain](https://www.rust-lang.org/tools/install)
-2. Run `cargo build --release`
-3. Find the built binary in `target/release/emacs-lsp-booster`
-
-Then, put the `emacs-lsp-booster` binary in your $PATH (e.g. `~/.local/bin`).
+2. Run `cargo install emacs-lsp-booster`. Make sure to include the cargo bin folder in your $PATH.
 
 ### Configure `lsp-mode`
 
