@@ -16,6 +16,12 @@ struct Cli {
     #[arg(last = true)]
     server_cmd: Vec<String>,
 
+    #[arg(long,
+          help = "[experimental] Use tcp mode instead of stdio mode. \
+                  In this case, the server_cmd should contain exactly two arguments that are interpreted as server address and listening address respestively. \
+                  E.g. `emacs_lsp_booster --tcp 127.0.0.1:1234 127.0.0.1:2345` would connect to server at port 1234 and listen at port 2345.")]
+    tcp: bool,
+
     #[arg(short = 'n', long,
           help = "Disable bytecode generation. Simply forward server json as-is. Useful for debugging or benchmarking.")]
     disable_bytecode: bool,
@@ -62,26 +68,35 @@ fn main() -> Result<()> {
         std::process::exit(1);
     }));
 
-    // In windows, Command::new cannot find .cmd files, so use `which` to do that
-    // https://github.com/rust-lang/rust/issues/37519
-    let server_cmd_prog = if cfg!(windows) {
-        which::which(&cli.server_cmd[0])?
-    } else {
-        std::path::PathBuf::from(&cli.server_cmd[0])
-    };
-    trace!("Using server prog: {:?}", server_cmd_prog);
-    let mut cmd = std::process::Command::new(&server_cmd_prog);
-    cmd.args(&cli.server_cmd[1..]);
-
-    let exit_status = app::run_app_forever(std::io::stdin(), std::io::stdout(), cmd, app::AppOptions {
+    let app_options = app::AppOptions {
         bytecode_options: if !cli.disable_bytecode {
             Some(bytecode::BytecodeOptions {
                 object_type: cli.json_object_type,
                 null_value: cli.json_null_value,
                 false_value: cli.json_false_value,
             }) } else { None },
-    })?;
-    std::process::exit(exit_status.code().unwrap_or(1))
+    };
+
+    if cli.tcp {
+        if cli.server_cmd.len() != 2 {
+            bail!("Need exactly two arguments as address for tcp mode");
+        }
+        app::run_app_tcp(&cli.server_cmd[0], &cli.server_cmd[1], app_options)
+    } else {
+        // In windows, Command::new cannot find .cmd files, so use `which` to do that
+        // https://github.com/rust-lang/rust/issues/37519
+        let server_cmd_prog = if cfg!(windows) {
+            which::which(&cli.server_cmd[0])?
+        } else {
+            std::path::PathBuf::from(&cli.server_cmd[0])
+        };
+        trace!("Using server prog: {:?}", server_cmd_prog);
+        let mut cmd = std::process::Command::new(&server_cmd_prog);
+        cmd.args(&cli.server_cmd[1..]);
+
+        let exit_status = app::run_app_stdio(cmd, app_options)?;
+        std::process::exit(exit_status.code().unwrap_or(1))
+    }
 }
 
 #[test]
