@@ -2,7 +2,6 @@ use std::collections::BTreeMap;
 use std::str::FromStr;
 
 use anyhow::{Result, bail};
-use simd_json as json;
 use smallvec::smallvec;
 
 

@@ -56,7 +56,7 @@ A flake for nix users is available [here](https://github.com/slotThe/emacs-lsp-b
 Alternatively, you may build the target locally:
 
 1. Setup [Rust toolchain](https://www.rust-lang.org/tools/install)
-2. Run `cargo build --release`
+2. Run `RUSTFLAGS='-C target-cpu=native' cargo build --release`
 3. Find the built binary in `target/release/emacs-lsp-booster`
 
 Then, put the `emacs-lsp-booster` binary in your $PATH (e.g. `~/.local/bin`).
