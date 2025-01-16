@@ -102,7 +102,7 @@ pub fn run_app_forever(client_reader: impl std::io::Read + Send + 'static,
                        client_writer: impl std::io::Write + Send + 'static,
                        mut server_cmd: std::process::Command,
                        options: AppOptions) -> Result<std::process::ExitStatus> {
-    info!("Running server {:?}", server_cmd);
+    info!("About to run the lsp server with command {:?}", server_cmd);
     if let Some(ref bytecode_options) = options.bytecode_options {
         info!("Will convert server json to bytecode! bytecode options: {:?}", bytecode_options);
     } else {
@@ -113,7 +113,13 @@ pub fn run_app_forever(client_reader: impl std::io::Read + Send + 'static,
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::inherit())
-        .spawn()?;
+        .spawn()
+        .with_context(|| {
+            format!(
+                "Failed to run the lsp server with command: {:?}",
+                server_cmd
+            )
+        })?;
 
     let (c2s_channel_pub, c2s_channel_sub) = mpsc::channel::<String>();
     let c2s_channel_counter = Arc::new(AtomicI32::new(0));

@@ -1,6 +1,13 @@
 [package]
 name = "emacs-lsp-booster"
-version = "0.0.0"  # this package will never be published as lib, so ignore this version field
+description = "Emacs LSP performance booster "
+homepage = "https://github.com/blahgeek/emacs-lsp-booster"
+repository = "https://github.com/blahgeek/emacs-lsp-booster"
+readme = "README.md"
+keywords = ["emacs", "lsp"]
+categories = ["command-line-utilities", "development-tools"]
+license = "MIT"
+version = "0.2.1"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
