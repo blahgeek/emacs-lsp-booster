@@ -56,7 +56,7 @@ A flake for nix users is available [here](https://github.com/slotThe/emacs-lsp-b
 Alternatively, you may install it from [crates.io](https://crates.io/crates/emacs-lsp-booster):
 
 1. Setup [Rust toolchain](https://www.rust-lang.org/tools/install)
-2. Run `cargo install emacs-lsp-booster`. Make sure to include the cargo bin folder in your $PATH.
+2. Run `RUSTFLAGS='-C target-cpu=native' cargo install emacs-lsp-booster`. Make sure to include the cargo bin folder in your $PATH.
 
 ### Configure `lsp-mode`
 

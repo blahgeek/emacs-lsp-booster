@@ -18,5 +18,6 @@ jobs:
         uses: rust-build/rust-build.action@v1.4.4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUSTFLAGS: '-C target-cpu=native'
         with:
           RUSTTARGET: ${{ matrix.target }}

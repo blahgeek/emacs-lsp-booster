@@ -1,4 +1,3 @@
-use serde_json as json;
 use serde::{ Deserialize, Serialize };
 
 // or notification
@@ -7,7 +6,7 @@ pub struct LspRequest {
     pub jsonrpc: String,
     pub id: Option<i32>,
     pub method: String,
-    pub params: json::Value,
+    pub params: serde_json::Value,
 }
 
 impl LspRequest {
@@ -26,25 +25,26 @@ pub struct LspResponseError {
 pub struct LspResponse {
     pub jsonrpc: String,
     pub id: i32,
-    pub result: json::Value,
+    pub result: serde_json::Value,
     pub error: Option<LspResponseError>,
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use simd_json as json;
 
     #[test]
     fn test_lsp_request() {
-        let json_str = r#"{
+        let mut json_str = r#"{
             "jsonrpc": "2.0",
             "id": 1,
             "method": "initialize",
             "params": {
                 "xxx": 123
             }
-        }"#;
-        let req: LspRequest = json::from_str(json_str).unwrap();
+        }"#.to_string();
+        let req: LspRequest = unsafe {json::from_str(&mut json_str).unwrap()};
         assert_eq!(req.jsonrpc, "2.0");
         assert_eq!(req.id, Some(1));
         assert_eq!(req.method, "initialize");
@@ -53,12 +53,14 @@ mod test {
 
     #[test]
     fn test_lsp_request_notification() {
-        let json_str = r#"{
+        let mut json_str = r#"{
             "jsonrpc": "2.0",
             "method": "initialized",
             "params": {}
-        }"#;
-        let req: LspRequest = json::from_str(json_str).unwrap();
+        }"#.to_string();
+        let req: LspRequest = unsafe {
+        json::from_str(&mut json_str).unwrap()
+        };
         assert_eq!(req.id, None);
         assert_eq!(req.method, "initialized");
         assert_eq!(req.is_notification(), true);
@@ -69,7 +71,7 @@ mod test {
         let resp = LspResponse {
             jsonrpc: "2.0".to_string(),
             id: 1,
-            result: json::Value::Null,
+            result: serde_json::Value::Null,
             error: Some(LspResponseError {
                 code: 123,
                 message: "asdf".to_string(),
