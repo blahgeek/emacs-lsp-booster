@@ -36,77 +36,82 @@ impl FromStr for LispObject {
     }
 }
 
-impl LispObject {
-    fn to_repl(&self) -> String {
+impl std::fmt::Display for LispObject {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            LispObject::Symbol(s) => s.clone(),
-            LispObject::Keyword(s) => format!(":{}", s),
+            LispObject::Symbol(s) => f.write_str(s),
+            LispObject::Keyword(s) => write!(f, ":{s}"),
             LispObject::Str(s) => {
-                let mut result = String::new();
-                result.reserve(s.len() * 2 + 2);
-                result.push('"');
+                f.write_char('"')?;
                 for c in s.chars() {
                     if c == '\"' || c == '\\' {
-                        result.push('\\');
-                        result.push(c);
+                        f.write_char('\\')?;
+                        f.write_char(c)?;
                     } else if (c as u32) < 32 || (c as u32) == 127 {
                         // not printable
                         // NOTE: cannot use escape for c in 128..=255, otherwise the string would become unibyte
-                        write!(result, "\\{:03o}", c as u32).unwrap();
+                        write!(f, "\\{:03o}", c as u32)?;
                     } else {
-                        result.push(c);
+                        f.write_char(c)?;
                     }
                 }
-                result.push('"');
-                result
+                f.write_char('"')?;
+                Ok(())
             },
             LispObject::UnibyteStr(vec) => {
-                let mut result = String::new();
-                result.reserve(vec.len() * 4 + 2);
-                result.push('"');
+                f.write_char('"')?;
                 let mut last_oct_escape_not_full = false;
                 for c in vec {
                     let mut oct_escape_not_full = false;
                     match *c {
-                        7 => result += "\\a",
-                        8 => result += "\\b",
-                        9 => result += "\\t",
-                        10 => result += "\\n",
-                        11 => result += "\\v",
-                        12 => result += "\\f",
-                        13 => result += "\\r",
-                        127 => result += "\\d",
-                        27 => result += "\\e",
+                        7 => f.write_str("\\a")?,
+                        8 => f.write_str("\\b")?,
+                        9 => f.write_str("\\t")?,
+                        10 => f.write_str("\\n")?,
+                        11 => f.write_str("\\v")?,
+                        12 => f.write_str("\\f")?,
+                        13 => f.write_str("\\r")?,
+                        127 => f.write_str("\\d")?,
+                        27 => f.write_str("\\e")?,
                         // NOTE: do not use 0..=7 in this branch, because it takes one more byte than the next branch
                         8..=26 => {  // \^@ \^A \^B ... \^Z
-                            write!(&mut result, "\\^{}", (*c as u32 + 64) as u8 as char).unwrap();
+                            write!(f, "\\^{}", (*c as u32 + 64) as u8 as char)?;
                         },
                         0..=7 | 27..=31 | 128..=255 | 34 | 92 => {  // oct, for unprintable and '"' and '\\'
-                            let last_len = result.len();
-                            write!(result, "\\{:o}", *c as u32).unwrap();
-                            if result.len() - last_len < 4 {
+                            let oct_s = format!("\\{:o}", *c as u32);
+                            if oct_s.len() < 4 {
                                 oct_escape_not_full = true;
                             }
+                            f.write_str(&oct_s)?;
                         },
                         _ => {  // printable
                             // https://www.gnu.org/software/emacs/manual/html_node/elisp/Non_002dASCII-in-St
                             if last_oct_escape_not_full && ('0'..='7').contains(&(*c as char)) {
-                                result += "\\ ";
+                                f.write_str("\\ ")?;
                             }
-                            result.push(*c as char);
+                            f.write_char(*c as char)?;
                         },
                     }
                     last_oct_escape_not_full = oct_escape_not_full;
                 }
-                result.push('"');
-                result
+                f.write_char('"')
             },
-            LispObject::Int(i) => i.to_string(),
-            LispObject::Float(s) => s.clone(),
-            LispObject::Nil => "nil".into(),
-            LispObject::T => "t".into(),
-            LispObject::Vector(v) =>
-                format!("[{}]", v.iter().map(|x| x.to_repl()).collect::<Vec<_>>().join(" "))
+            LispObject::Int(i) => write!(f, "{i}"),
+            LispObject::Float(s) => write!(f, "{s}"),
+            LispObject::Nil => f.write_str("nil"),
+            LispObject::T => f.write_str("t"),
+            LispObject::Vector(v) => {
+                f.write_char('[')?;
+                let mut iter = v.iter();
+                if let Some(first) = iter.next() {
+                    write!(f, "{first}")?;
+                    for x in iter {
+                        write!(f, " {x}")?;
+                    }
+                }
+                f.write_char(']')?;
+                Ok(())
+            }
         }
     }
 }
@@ -424,8 +429,8 @@ impl BytecodeCompiler {
     fn into_repl(self) -> Result<String> {
         let (code, constants, max_stack_size) = self.into_bytecode()?;
         Ok(format!("#[0 {} {} {}]",
-                   LispObject::UnibyteStr(code).to_repl(),
-                   LispObject::Vector(constants).to_repl(),
+                   LispObject::UnibyteStr(code),
+                   LispObject::Vector(constants),
                    max_stack_size))
     }
 }
@@ -443,9 +448,9 @@ pub fn generate_bytecode_repl(value: &json::Value, options: BytecodeOptions) -> 
 
 #[test]
 fn test_string_repl() {
-    assert_eq!(LispObject::UnibyteStr("\x00".into()).to_repl(), r#""\0""#);
-    assert_eq!(LispObject::UnibyteStr("\x1a".into()).to_repl(), r#""\^Z""#);
-    assert_eq!(LispObject::UnibyteStr("\x20".into()).to_repl(), r#"" ""#);
-    assert_eq!(LispObject::UnibyteStr("\x7f".into()).to_repl(), r#""\d""#);
-    assert_eq!(LispObject::UnibyteStr(vec![0xff]).to_repl(), r#""\377""#);
+    assert_eq!(format!("{}", LispObject::UnibyteStr("\x00".into())), r#""\0""#);
+    assert_eq!(format!("{}", LispObject::UnibyteStr("\x1a".into())), r#""\^Z""#);
+    assert_eq!(format!("{}", LispObject::UnibyteStr("\x20".into())), r#"" ""#);
+    assert_eq!(format!("{}", LispObject::UnibyteStr("\x7f".into())), r#""\d""#);
+    assert_eq!(format!("{}", LispObject::UnibyteStr(vec![0xff])), r#""\377""#);
 }
