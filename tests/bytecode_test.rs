@@ -1,6 +1,5 @@
 use serde_json as json;
 use anyhow::Result;
-use tempfile;
 
 use emacs_lsp_booster::bytecode;
 
@@ -9,7 +8,7 @@ fn run_one_test(json_str: &str, object_type: bytecode::ObjectType) -> Result<()>
     let json_value: json::Value = json::from_str(json_str)?;
     let json_str_nowhitespaces = json_value.to_string();
     let bytecode = bytecode::generate_bytecode_repl(&json_value, bytecode::BytecodeOptions {
-        object_type: object_type.clone(),
+        object_type,
         ..Default::default()
     })?;
 
@@ -52,9 +51,9 @@ fn test_bytecode() {
     // unicode test
     run_one_test(r#"{"a":"ÀÁÂÃÄÅÆÇÈÉÊËÌ abcd \n 你好世界"}"#, bytecode::ObjectType::Plist).unwrap();
 
-    for object_type in vec![bytecode::ObjectType::Plist,
-                            bytecode::ObjectType::Alist,
-                            bytecode::ObjectType::Hashtable] {
+    for object_type in [bytecode::ObjectType::Plist,
+                        bytecode::ObjectType::Alist,
+                        bytecode::ObjectType::Hashtable] {
         eprintln!("Testing completion.json (~100KB), object type = {:?}", object_type);
         run_one_test(include_str!("./data/completion.json"), object_type).unwrap();
 

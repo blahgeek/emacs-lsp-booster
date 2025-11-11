@@ -182,7 +182,7 @@ impl Op {
             &Self::StackRef(v) if (1..=4).contains(&v) =>
                 Ok(smallvec![v as u8]),
             &Self::StackRef(_) => unimplemented!(),
-            &Self::List(v) if v == 0 => unreachable!(),
+            &Self::List(0) => unreachable!(),
             &Self::List(v) if (1..=4).contains(&v) => Ok(smallvec![66 + v]),
             &Self::List(v) => Ok(smallvec![175, v]),
             &Self::Discard => Ok(smallvec![136]),
