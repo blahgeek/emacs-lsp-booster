@@ -1,3 +1,4 @@
+use std::fmt::Write;
 use std::collections::BTreeMap;
 use std::str::FromStr;
 
@@ -51,7 +52,7 @@ impl LispObject {
                     } else if (c as u32) < 32 || (c as u32) == 127 {
                         // not printable
                         // NOTE: cannot use escape for c in 128..=255, otherwise the string would become unibyte
-                        result += &format!("\\{:03o}", c as u32);
+                        write!(result, "\\{:03o}", c as u32).unwrap();
                     } else {
                         result.push(c);
                     }
@@ -78,14 +79,14 @@ impl LispObject {
                         27 => result += "\\e",
                         // NOTE: do not use 0..=7 in this branch, because it takes one more byte than the next branch
                         8..=26 => {  // \^@ \^A \^B ... \^Z
-                            result += &format!("\\^{}", (*c as u32 + 64) as u8 as char);
+                            write!(&mut result, "\\^{}", (*c as u32 + 64) as u8 as char).unwrap();
                         },
                         0..=7 | 27..=31 | 128..=255 | 34 | 92 => {  // oct, for unprintable and '"' and '\\'
-                            let oct_s = format!("\\{:o}", *c as u32);
-                            if oct_s.len() < 4 {
+                            let last_len = result.len();
+                            write!(result, "\\{:o}", *c as u32).unwrap();
+                            if result.len() - last_len < 4 {
                                 oct_escape_not_full = true;
                             }
-                            result += &oct_s;
                         },
                         _ => {  // printable
                             // https://www.gnu.org/software/emacs/manual/html_node/elisp/Non_002dASCII-in-St
