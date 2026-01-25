@@ -1,14 +1,14 @@
-use anyhow::{Result, bail};
+use anyhow::{bail, Result};
+use clap::{crate_version, CommandFactory, Parser};
 use log::trace;
-use clap::Parser;
 
 use emacs_lsp_booster::app;
 use emacs_lsp_booster::bytecode;
 
-
 #[derive(Parser)]
 #[command(long_about = None, about = None,
-          arg_required_else_help = true, after_help = "For backward compatibility, `emacs-lsp-booster <SERVER_CMD>...` (without any options) is also supported" )]
+    arg_required_else_help = true, after_help = "For backward compatibility, `emacs-lsp-booster <SERVER_CMD>...` (without any options) is also supported",
+    version = crate_version!())]
 struct Cli {
     #[command(flatten)]
     verbose: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
@@ -103,4 +103,7 @@ fn test_parse_args() {
     assert_eq!(cli.json_object_type, bytecode::ObjectType::Hashtable);
     assert_eq!(cli.json_null_value, bytecode::LispObject::Keyword("null".into()));
     assert_eq!(cli.json_false_value, bytecode::LispObject::Keyword("json-false".into()));
+
+    let cmd = Cli::command();
+    assert_eq!(cmd.get_version(), Some(env!("CARGO_PKG_VERSION")));
 }
