@@ -1,10 +1,10 @@
-use std::sync::{mpsc, Arc, atomic::{AtomicI32, self}};
+use std::{fmt::Debug, net::{TcpListener, TcpStream, ToSocketAddrs}, sync::{atomic::{self, AtomicI32}, mpsc, Arc}};
 
 use log::{warn, info, debug};
 use anyhow::{Result, Context};
 use serde_json as json;
 
-use crate::{rpcio, bytecode::{self, BytecodeOptions}};
+use crate::{bytecode::{self, BytecodeOptions}, rpcio};
 use crate::lsp_message::{LspRequest, LspResponse, LspResponseError};
 
 fn process_channel_to_writer(channel_sub: mpsc::Receiver<String>,
@@ -96,60 +96,57 @@ pub struct AppOptions {
     pub bytecode_options: Option<bytecode::BytecodeOptions>,
 }
 
-pub fn run_app_forever(client_reader: impl std::io::Read + Send + 'static,
-                       client_writer: impl std::io::Write + Send + 'static,
-                       mut server_cmd: std::process::Command,
-                       options: AppOptions) -> Result<std::process::ExitStatus> {
-    info!("About to run the lsp server with command {:?}", server_cmd);
+// Return the receiver which can be used get notifications about thread termination
+fn run_app(client_reader: impl std::io::Read + Send + 'static,
+           client_writer: impl std::io::Write + Send + 'static,
+           server_reader: impl std::io::Read + Send + 'static,
+           server_writer: impl std::io::Write + Send + 'static,
+           options: AppOptions) -> Result<mpsc::Receiver<()>> {
     if let Some(ref bytecode_options) = options.bytecode_options {
         info!("Will convert server json to bytecode! bytecode options: {:?}", bytecode_options);
     } else {
         info!("Bytecode disabled! Will forward server json as-is.")
     }
 
-    let mut proc = server_cmd
-        .stdin(std::process::Stdio::piped())
-        .stdout(std::process::Stdio::piped())
-        .stderr(std::process::Stdio::inherit())
-        .spawn()
-        .with_context(|| {
-            format!(
-                "Failed to run the lsp server with command: {:?}",
-                server_cmd
-            )
-        })?;
+    let (finish_sender, finish_receiver) = mpsc::channel::<()>();
 
     let (c2s_channel_pub, c2s_channel_sub) = mpsc::channel::<String>();
     let c2s_channel_counter = Arc::new(AtomicI32::new(0));
     let (s2c_channel_pub, s2c_channel_sub) = mpsc::channel::<String>();
 
     {
+        let finish_sender = finish_sender.clone();
         let c2s_channel_counter = c2s_channel_counter.clone();
-        let proc_stdin = proc.stdin.take().unwrap();
         std::thread::spawn(move || {
             debug!("Started client->server write thread");
-            process_channel_to_writer(c2s_channel_sub, Some(c2s_channel_counter), proc_stdin)
+            process_channel_to_writer(c2s_channel_sub, Some(c2s_channel_counter), server_writer)
                 .with_context(|| "Client->server write thread failed")
                 .unwrap();
             debug!("Finished client->server write thread");
+            let _ = finish_sender.send(());  // ignore error
         });
     }
-    std::thread::spawn(move || {
-        debug!("Started server->client write thread");
-        process_channel_to_writer(s2c_channel_sub, None, client_writer)
-            .with_context(|| "Server->client write thread failed")
-            .unwrap();
-        debug!("Finished server->client write thread");
-    });
     {
+        let finish_sender = finish_sender.clone();
+        std::thread::spawn(move || {
+            debug!("Started server->client write thread");
+            process_channel_to_writer(s2c_channel_sub, None, client_writer)
+                .with_context(|| "Server->client write thread failed")
+                .unwrap();
+            debug!("Finished server->client write thread");
+            let _ = finish_sender.send(());  // ignore error
+        });
+    }
+    {
+        let finish_sender = finish_sender.clone();
         let s2c_channel_pub = s2c_channel_pub.clone();
-        let proc_stdout = proc.stdout.take().unwrap();
         std::thread::spawn(move || {
             debug!("Started server->client read thread");
-            process_server_reader(proc_stdout, s2c_channel_pub, options.bytecode_options)
+            process_server_reader(server_reader, s2c_channel_pub, options.bytecode_options)
                 .with_context(|| "Server->client read thread failed")
                 .unwrap();
             debug!("Finished server->client read thread");
+            let _ = finish_sender.send(());  // ignore error
         });
     }
     std::thread::spawn(move || {
@@ -159,7 +156,45 @@ pub fn run_app_forever(client_reader: impl std::io::Read + Send + 'static,
             .with_context(|| "Client->server read thread failed")
             .unwrap();
         debug!("Finished client->server read thread");
+        let _ = finish_sender.send(());  // ignore error
     });
 
+    Ok(finish_receiver)
+}
+
+pub fn run_app_stdio(mut server_cmd: std::process::Command,
+                     options: AppOptions) -> Result<std::process::ExitStatus> {
+    info!("About to run the lsp server with command {:?}", server_cmd);
+    let mut proc = server_cmd
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::inherit())
+        .spawn()
+        .context(format!("Failed to run the lsp server with command: {:?}", server_cmd))?;
+
+    run_app(std::io::stdin(), std::io::stdout(),
+            proc.stdout.take().unwrap(), proc.stdin.take().unwrap(),
+            options)?;
     Ok(proc.wait()?)
+}
+
+pub fn run_app_tcp(server_addr: impl ToSocketAddrs + Debug,
+                   listen_addr: impl ToSocketAddrs + Debug,
+                   options: AppOptions) -> Result<()> {
+    info!("Connecting to server at {:?}", server_addr);
+    let server_conn = TcpStream::connect(server_addr)?;
+
+    info!("Listenting at {:?}", listen_addr);
+    let client_listener = TcpListener::bind(listen_addr)?;
+    // NOTE: only accept single client for now. Is it enough?
+    let (client_conn, _) = client_listener.accept()?;
+    info!("Client connected, start running");
+
+    let finish_receiver = run_app(client_conn.try_clone()?,
+                                  client_conn.try_clone()?,
+                                  server_conn.try_clone()?,
+                                  server_conn.try_clone()?,
+                                  options)?;
+    let _ = finish_receiver.recv();  // wait for finish, ignore error
+    Ok(())
 }
