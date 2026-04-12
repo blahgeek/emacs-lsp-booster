@@ -114,3 +114,19 @@ Huge thanks to @jdtsmith
 ### Advanced usage
 
 Run `emacs-lsp-booster --help` for more options.
+
+### Development
+
+This project uses [mise](https://mise.jdx.dev/) for toolchain management.
+
+1. [Install mise](https://mise.jdx.dev/getting-started.html)
+2. Run `mise install` to set up the Rust toolchain
+3. Install Emacs (needed for integration tests):
+   - macOS: `brew install emacs`
+   - Ubuntu/Debian: `sudo apt-get install emacs`
+4. Common tasks:
+   - `mise run build` — Build the project
+   - `mise run test` — Run all tests
+   - `mise run lint` — Run clippy
+   - `mise run fmt` — Check formatting
+   - `mise run release` — Build release binary

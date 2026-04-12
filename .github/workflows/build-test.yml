@@ -2,27 +2,28 @@ name: Build and test
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
     paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'Cargo.*'
+      - "src/**"
+      - "tests/**"
+      - "Cargo.*"
+      - "mise.toml"
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
   build-and-test:
-
     runs-on: ubuntu-latest
-
     steps:
-    - name: Install Emacs
-      run: sudo apt-get install -y emacs
-    - uses: actions/checkout@v3
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose -- --nocapture
+      - uses: actions/checkout@v4
+      - name: Install Emacs
+        run: sudo apt-get update && sudo apt-get install -y emacs
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+      - name: Build
+        run: mise run build
+      - name: Run tests
+        run: mise run test

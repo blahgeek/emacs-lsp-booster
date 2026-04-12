@@ -7,16 +7,83 @@ on:
 jobs:
   release:
     name: release ${{ matrix.target }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        target: [x86_64-unknown-linux-musl, x86_64-apple-darwin, x86_64-pc-windows-gnu]
+        include:
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            use_cross: true
+            binary_name: emacs-lsp-booster
+            archive_ext: tar.gz
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            use_cross: true
+            binary_name: emacs-lsp-booster
+            archive_ext: tar.gz
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-latest
+            use_cross: true
+            binary_name: emacs-lsp-booster
+            archive_ext: tar.gz
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            use_cross: true
+            binary_name: emacs-lsp-booster
+            archive_ext: tar.gz
+          - target: x86_64-apple-darwin
+            os: macos-14
+            use_cross: false
+            binary_name: emacs-lsp-booster
+            archive_ext: tar.gz
+          - target: aarch64-apple-darwin
+            os: macos-14
+            use_cross: false
+            binary_name: emacs-lsp-booster
+            archive_ext: tar.gz
+          - target: x86_64-pc-windows-gnu
+            os: ubuntu-latest
+            use_cross: true
+            binary_name: emacs-lsp-booster.exe
+            archive_ext: zip
     steps:
-      - uses: actions/checkout@master
-      - name: Compile and release
-        uses: rust-build/rust-build.action@v1.4.4
+      - uses: actions/checkout@v4
+
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+
+      - name: Install cross
+        if: matrix.use_cross
+        run: cargo install cross --locked
+
+      - name: Build with cross
+        if: matrix.use_cross
+        run: cross build --release --target ${{ matrix.target }}
+
+      - name: Build native
+        if: ${{ !matrix.use_cross }}
+        run: |
+          rustup target add ${{ matrix.target }}
+          cargo build --release --target ${{ matrix.target }}
+
+      - name: Package (tar.gz)
+        if: matrix.archive_ext == 'tar.gz'
+        run: |
+          cd target/${{ matrix.target }}/release
+          tar czf ../../../${{ matrix.binary_name }}-${{ github.ref_name }}-${{ matrix.target }}.tar.gz ${{ matrix.binary_name }}
+          shasum -a 256 ../../../${{ matrix.binary_name }}-${{ github.ref_name }}-${{ matrix.target }}.tar.gz > ../../../${{ matrix.binary_name }}-${{ github.ref_name }}-${{ matrix.target }}.tar.gz.sha256sum
+
+      - name: Package (zip)
+        if: matrix.archive_ext == 'zip'
+        run: |
+          cd target/${{ matrix.target }}/release
+          zip ../../../${{ matrix.binary_name }}-${{ github.ref_name }}-${{ matrix.target }}.zip ${{ matrix.binary_name }}
+          shasum -a 256 ../../../${{ matrix.binary_name }}-${{ github.ref_name }}-${{ matrix.target }}.zip > ../../../${{ matrix.binary_name }}-${{ github.ref_name }}-${{ matrix.target }}.zip.sha256sum
+
+      - name: Upload release artifact
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.binary_name }}-*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          RUSTTARGET: ${{ matrix.target }}

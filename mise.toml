@@ -1,0 +1,31 @@
+[tools]
+rust = "latest"
+
+[tasks.build]
+description = "Build the project"
+run = "cargo build --verbose"
+
+[tasks.test]
+description = "Run all tests"
+depends = ["build"]
+run = "cargo test --verbose -- --nocapture"
+
+[tasks.lint]
+description = "Run clippy linter"
+run = "cargo clippy -- -D warnings"
+
+[tasks.fmt]
+description = "Check formatting"
+run = "cargo fmt -- --check"
+
+[tasks.fmt-fix]
+description = "Fix formatting"
+run = "cargo fmt"
+
+[tasks.ci]
+description = "Run full CI pipeline (build + test)"
+depends = ["build", "test"]
+
+[tasks.release]
+description = "Build release binary for current platform"
+run = "cargo build --release"
