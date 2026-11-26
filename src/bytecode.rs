@@ -50,10 +50,17 @@ impl LispObject {
                         result.push(c);
                     } else if (c as u32) < 32 || (c as u32) == 127 {
                         // not printable
-                        // NOTE: cannot use escape for c in 128..=255, otherwise the string would become unibyte
                         result += &format!("\\{:03o}", c as u32);
-                    } else {
+                    } else if c.is_ascii() {
                         result.push(c);
+                    } else if (c as u32) <= 0xffff {
+                        // JSONRPC clients read this Lisp in binary/unibyte buffers.
+                        // Literal UTF-8 would be read as individual bytes.  Unicode
+                        // escapes preserve characters without changing bytecode's
+                        // separate, intentionally unibyte instruction strings.
+                        result += &format!("\\u{:04x}", c as u32);
+                    } else {
+                        result += &format!("\\U{:08x}", c as u32);
                     }
                 }
                 result.push('"');
@@ -447,4 +454,10 @@ fn test_string_repl() {
     assert_eq!(LispObject::UnibyteStr("\x20".into()).to_repl(), r#"" ""#);
     assert_eq!(LispObject::UnibyteStr("\x7f".into()).to_repl(), r#""\d""#);
     assert_eq!(LispObject::UnibyteStr(vec![0xff]).to_repl(), r#""\377""#);
+}
+
+#[test]
+fn test_unicode_string_repl() {
+    assert_eq!(LispObject::Str("ü→🚀".into()).to_repl(), r#""\u00fc\u2192\U0001f680""#);
+    assert_eq!(LispObject::Str("é123".into()).to_repl(), r#""\u00e9123""#);
 }
