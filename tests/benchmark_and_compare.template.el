@@ -91,6 +91,14 @@
                       (setq bytecode-val
                             (funcall (read bytecode-str))))
     (error "NOT EQUAL!"))
+  ;; Eglot/jsonrpc feeds `read' a binary buffer, not a decoded Lisp string.
+  ;; Check this transport path as well as the decoded-input path above.
+  (with-temp-buffer
+    (set-buffer-multibyte nil)
+    (insert (encode-coding-string bytecode-str 'utf-8-unix))
+    (goto-char (point-min))
+    (unless (json-equal json-val (funcall (read (current-buffer))))
+      (error "NOT EQUAL when reading bytecode from a binary buffer!")))
   (message "Benchmark json-parse-string 100 times: %s"
            (benchmark-run 100
              (json-parse-string json-str :object-type object-type :null-object nil :false-object nil)))

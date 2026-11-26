@@ -54,6 +54,11 @@ fn test_bytecode() {
     for object_type in [bytecode::ObjectType::Plist,
                         bytecode::ObjectType::Alist,
                         bytecode::ObjectType::Hashtable] {
+        // Mix ASCII, Latin-1, BMP, supplementary-plane Unicode and control
+        // characters, including hex/octal-looking text after Unicode escapes.
+        run_one_test(r#"{"hover":"→ `struct cdev_dings *` Grüße 中文 🚀 \u0080\u00ff\u0100\u007f\u0000\n\t\"\\","adjacent":"é123界abc🚀012"}"#,
+                     object_type).unwrap();
+
         eprintln!("Testing completion.json (~100KB), object type = {:?}", object_type);
         run_one_test(include_str!("./data/completion.json"), object_type).unwrap();
 
